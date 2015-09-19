@@ -1,4 +1,4 @@
-(ns foo.impl.vector
+(ns foo.proto.impl.vector
   (:require [clojure.tools.logging :as log :only [debug info]]))
 
 (defn median

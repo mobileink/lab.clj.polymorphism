@@ -1,8 +1,8 @@
-(ns foo.api
+(ns foo.proto.api
   (:refer-clojure :exclude [count])
   (:require [clojure.tools.logging :as log :only [debug info]]))
 
-(clojure.core/println "loading foo.api")
+(clojure.core/println "loading foo.proto.api")
 
 (defprotocol PFoo
   "protocol for Foo datatype"

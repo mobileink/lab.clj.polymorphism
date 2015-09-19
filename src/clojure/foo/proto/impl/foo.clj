@@ -1,15 +1,15 @@
-(ns foo.impl.foo
+(ns foo.proto.impl.foo
   (:refer-clojure :exclude [count])
-  (:require [foo.api :as api]
-            [foo.impl.list :as foo-list]
-            [foo.impl.map :as foo-map]
-            [foo.impl.set :as foo-set]
-            [foo.impl.vector :as foo-vector]
-            [foo.impl.lsv :as foo-lsv]
+  (:require [foo.proto.api :as api]
+            [foo.proto.impl.list :as foo-list]
+            [foo.proto.impl.map :as foo-map]
+            [foo.proto.impl.set :as foo-set]
+            [foo.proto.impl.vector :as foo-vector]
+            [foo.proto.impl.lsv :as foo-lsv]
             [clojure.tools.logging :as log :only [debug info]]
             ))
 
-(println "loading foo.impl.foo")
+(println "loading foo.proto.impl.foo")
 
 (extend clojure.lang.IPersistentList
   api/PFoo

@@ -1,9 +1,9 @@
-(ns foo.core
-  (:require [foo.api :as foo]
+(ns foo.proto.core
+  (:require [foo.proto.api :as foo]
             [clojure.data.generators :as g]
             [clojure.tools.logging :as log :only [debug info]]))
 
-(clojure.core/println "loading foo.core")
+(clojure.core/println "loading foo.proto.core")
 
 ;; create some test data
 
