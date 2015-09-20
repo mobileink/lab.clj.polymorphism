@@ -1,8 +1,17 @@
 (ns algebra.struct.n0
   (:require [clojure.tools.logging :as log :only [debug info]]))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;  OpSigGroup operator implementations
+
+(defn group-name [_] "Group (N,0,+)")
+(defn id [_] 0)
+(defn struct-kw [_]
+  (log/debug "struct-kw")
+  :n0)
+
 (defn mult
-  [operand1 operand2]
+  [t operand1 operand2]
   (log/info "mult")
   (if (and ;; (integer? operand1)
            (> operand1 -1)
