@@ -49,7 +49,7 @@ extremely simple; they have an underlying set, one distinguished
 element of that set that acts as an identity element, and one binary
 operation; additionally, some basic rules about how the operation
 works (e.g. a*b=b*a).  Infinitely many mathematical structures may
-behave as Groups.  The textbook examples are: (N,0,+), where the set
+behave as Groups.  The textbook examples are: (N,0,\+), where the set
 is Nat (with zero), the identity element is 0, and the operation is
 addition, and (N+,1,*), where the set is the positive Natural numbers,
 the identity element is 1, and the operation is multiplication.  The
@@ -91,9 +91,11 @@ precisely what we need: expresses a mapping from signature to
 structure, or, in more programming-oriented language, from interface
 to implementation.
 
+However, to really make this work - to make it possible to switch from
+one model to another (swap implementations) - you need more than just
+`defprotocol` and friends.
 
-
-=== explanation
+=== the technique
 
 The trick, which I learned from
 link:https://github.com/mikera/core.matrix[core.matrix], is to exploit
