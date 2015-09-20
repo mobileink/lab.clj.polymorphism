@@ -7,6 +7,7 @@
             [algebra.struct.default :as default]
             [algebra.struct.n0 :as n0]
             [algebra.struct.n1 :as n1]
+            [algebra.struct.q3 :as q3]
             [algebra.struct.d0 :as d0]
             [algebra.struct.d1 :as d1]
             [algebra.struct.keyword :as kw]
@@ -49,6 +50,14 @@
    :** n1/mult
    :id n1/id
    :id? n1/id?})
+
+(extend algebra.struct.Q3+
+  g/OpSigGroup
+  {:name q3/group-name
+   :struct-kw q3/struct-kw
+   :** q3/mult
+   :id q3/id
+   :id? q3/id?})
 
 ;;;;;;;;;;;;;;;; other stuff
 (extend java.lang.Long

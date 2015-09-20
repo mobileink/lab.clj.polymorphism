@@ -7,8 +7,4 @@
 
 (set-refresh-dirs "test/clojure" "src/clojure" "src/clojure/foo")
 
-(def m {:foo true :a 1 :b 2 :c 3 :d 4 :e 5})
-(def s #{:foo 1 2 3 4 5})
-(def l '(:foo 1 2 3 4 5))
-(def v [:foo 1 2 3 4 5])
 
