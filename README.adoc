@@ -29,6 +29,44 @@ user => (** 3 5)
 2
 ----
 
+=== explanation
+
+The trick, which I learned from
+link:https://github.com/mikera/core.matrix[core.matrix], is to exploit
+the fact that Clojure's Protocol mechanism dispatches function calls
+on the first arg.  Knowing this, we just parameterize operation calls
+with a first arg whose sole purpose is to determine dispatch - the
+"content" of the arg is irrelevant.  Of course to do this you have to
+intercept the call in the first place, and then decide which type to
+use for dispatch.  For that you keep a var; changing the var
+effectively switches from one algebra to another, by changing the
+dispatch parameter.
+
+One reason I wrote this little app is to have a clean and simple
+expression of the technique used by core.matrix.  I had to study that
+code pretty hard to before the technique stood out from implementation
+details.  I don't mean the code is bad or hard to read, I mean it's
+mixed up with the details of implementing core.matrix, so I wanted
+something purely focussed on demonstrating the technique with minimal
+extra stuff.  So that I'll be able to return to it in six months,
+after I've forgotten everything about core.matrix, and so that others
+can learn the technique independent of matrix stuff.
+
+The way I do it here is slightly different than the way core.matrix
+does it.  I use a default implementation (defined on java.lang.Object)
+to manage dispatch.  So calls to Protocol functions are always sent to
+the default Object implementation, which checks to see what the
+current model (implementation) is, and rewrites and forwards the call
+as required.  core.matrix uses a separate API "wrapper" namespace to
+do this, before calls reach the Protocol interface.  That approach has
+the virtue of separating the user interface from the Protocol
+interface, but that is also a vice, since it means you have to keep
+them in sync.  I decided to use default Object as dispatcher in order
+to ensure that the user API always matches the Protocol signature.
+And also just to experiment.  I don't know which technique is
+preferable.
+
+
 == other stuff
 
 The code in the `foo` subdir is a more basic example of protocols v. multimethods.
