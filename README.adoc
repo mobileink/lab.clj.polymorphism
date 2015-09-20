@@ -1,10 +1,10 @@
-# lab.clj.protocols
+= lab.clj.protocols
 Lab for experimenting with Clojure Protocols
 
-## Group algebras
+== Group algebras
 
 1. Fork/clone
-2. ```lein repl```, then do ```refresh-all`` (see dev/user.clj for config stuff)
+2. `lein repl`, then do `refresh-all` (see dev/user.clj for config stuff)
 
 Then explore.  Three Groups are provided; using them as a pattern it
 should be easy to implement your own.
@@ -29,10 +29,10 @@ user => (** 3 5)
 2
 ----
 
-## other stuff
+== other stuff
 
 The code in the `foo` subdir is a more basic example of protocols v. multimethods.
 
 
-## the problem
+== the problem
 
