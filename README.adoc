@@ -1,7 +1,11 @@
 = lab.clj.protocols
-Lab for experimenting with Clojure Protocols
 
-== Group algebras
+Lab for experimenting with Clojure Protocols.
+
+This project contains some minimal code intended to demonstrate some
+basic uses of Clojure Protocols.
+
+=== getting started
 
 1. Fork/clone
 2. `lein repl`, then do `refresh-all` (see dev/user.clj for config stuff)
@@ -29,6 +33,66 @@ user => (** 3 5)
 2
 ----
 
+== Protocols as Algebraic Operator Signatures
+
+Algebra is where logic meets mathematics.  Loosely speaking, an
+algebra is the marriage of a *signature* (which is a formal logical
+calculus) and a *structure* (which is an informal mathematical
+"object'); what ties them together is a *model*, which uses the
+mathematical structure to interpret the linguistic expressions
+formable using the signature.
+
+What this implies is that many different structures may be used to
+model a given signature or language.  The classic example, which is
+implemented in this project, is the algebraic _*Group*_.  Groups are
+extremely simple; they have an underlying set, one distinguished
+element of that set that acts as an identity element, and one binary
+operation; additionally, some basic rules about how the operation
+works (e.g. a*b=b*a).  Infinitely many mathematical structures may
+behave as Groups.  The textbook examples are: (N,0,+), where the set
+is Nat (with zero), the identity element is 0, and the operation is
+addition, and (N+,1,*), where the set is the positive Natural numbers,
+the identity element is 1, and the operation is multiplication.  The
+structures are obviously not the same, but _as Groups_ they behave in
+exactly the same way.
+
+The relevance of such an algebraic perspective to programming is
+pretty obvious, even though it is not often explicitly noted.  The
+distinction between signature and structure is analogous to the one
+between interface and implementation.  If you design well, you can
+swap implementations of an interface without changing the behavior of
+the system, e.g. going from a hashmap to an arraymap.
+
+One of the beauties of Clojure's Protocols is that they make it
+relatively easy to work in this manner.
+
+Clojure's Protocols only include functions; algebras will always or at
+least usually include some constant symbols (like the digits 0-9),
+just as the underlying structures will contains some constant "values"
+like the natural numbers.  So strictly speaking we should think of
+Protocols as analogous to the "operator signature" of an algebra,
+i.e. the subset of a signature consisting of all the function symbols.
+
+Once you have a signature, (a Clojure Protocol definition), you need
+to relate it to a structure in order to use it to express anything
+meaningful.  Mathematically this involves specifying an
+"interpretation", which is just a mapping from symbols in the
+signature to values in the structure; I'm calling this a _model_.
+Technically it's a little more complicated than that but the basic
+concepts of _signature_, _structure_, and _model_ seem to be pretty
+straightforward, and they match actual mathematical practice and
+terminology pretty well.
+
+So we think of a Clojure Protocol as a Signature (an "OpSig" or
+operater signature, to be more precise), and we think of the code we
+write to implement the operators in the signature as a structure.
+To bind the two together, we use Clojure's `extend` macro, which does
+precisely what we need: expresses a mapping from signature to
+structure, or, in more programming-oriented language, from interface
+to implementation.
+
+
+
 === explanation
 
 The trick, which I learned from
@@ -44,7 +108,7 @@ dispatch parameter.
 
 One reason I wrote this little app is to have a clean and simple
 expression of the technique used by core.matrix.  I had to study that
-code pretty hard to before the technique stood out from implementation
+code pretty hard before the technique stood out from implementation
 details.  I don't mean the code is bad or hard to read, I mean it's
 mixed up with the details of implementing core.matrix, so I wanted
 something purely focussed on demonstrating the technique with minimal
