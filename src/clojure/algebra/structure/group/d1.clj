@@ -1,4 +1,4 @@
-(ns algebra.struct.d1
+(ns algebra.structure.group.d1
   (:require [clojure.tools.logging :as log :only [debug info]]))
 
 (defn mult

@@ -1,0 +1,10 @@
+an 'extend' expression specifies a model - a mapping from signature to
+structure.  specifically it extends the signature of a type to include
+some new operations, and maps the new ops to structure ops
+(i.e. implementations).
+
+parameterized models - all calls to these ops will be parameterized by
+a type datum.  e.g. instead of (add a b), (add t a b).  the only
+purpose of the type parameter is to determine dispatch-by-type - its
+value is not used.
+

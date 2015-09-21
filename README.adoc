@@ -10,11 +10,12 @@ basic uses of Clojure Protocols.
 1. Fork/clone
 2. `lein repl`, then do `refresh-all` (see dev/user.clj for config stuff)
 
-Then explore.  Three Groups are provided; using them as a pattern it
+Then explore.  Several algebras are provided; using them as a pattern it
 should be easy to implement your own.
 
-* N0:  (N, 0, +), underlying set is Natural numbers with zero, identity element is 0, operation is addition
-* N1:  (N, 1, *), underlying set is positive Natural numbers, identity element is 1, operation is multiplication
+
+* monoid N0:  (N, 0, +), underlying set is Natural numbers with zero, identity element is 0, operation is addition
+* monoid N1:  (N, 1, *), underlying set is positive Natural numbers, identity element is 1, operation is multiplication
 * Q3+:  quotient group mod 3 over integers, identity is 0, op is addition
 
 [source,clojure]
@@ -120,7 +121,7 @@ can learn the technique independent of matrix stuff.  Also, I wanted
 to highlight the algebraic structure of the technique, which I've
 tried to do by using the algebraic terminology of signature,
 structure, and model, and organizing the code accordingly.
-
+ 
 The way I do it here is slightly different than the way core.matrix
 does it.  I use a default implementation (defined on java.lang.Object)
 to manage dispatch.  So calls to Protocol functions are always sent to
@@ -134,6 +135,43 @@ them in sync.  I decided to use default Object as dispatcher in order
 to ensure that the user API always matches the Protocol signature.
 And also just to experiment.  I don't know which technique is
 preferable.
+
+
+== some algebras
+
+=== link:https://en.wikipedia.org/wiki/Magma_(algebra)[magma]
+
+"a set, M, equipped with a single binary operation, M × M → M. The binary operation must be closed by definition but no other properties are imposed."
+
+"For all a, b in M, the result of the operation a • b is also in M." (link:https://en.wikipedia.org/wiki/Magma_(algebra)#Definition[magma])
+
+Example:  Cayley table (link:http://math.stackexchange.com/questions/779507/can-you-give-me-some-concrete-examples-of-magmas[])
+
+link:http://arxiv.org/ftp/math/papers/0304/0304490.pdf[]
+
+
+=== link:https://en.wikipedia.org/wiki/Semigroup[semigroup]
+
+set with associative binary combinator; an associative magma
+
+link:https://en.wikipedia.org/wiki/Semigroup#Definition[definition]: "A semigroup is a set S together with a binary operation "\cdot" (that is, a function \cdot:S\times S\rightarrow S) that satisfies the associative property"
+
+=== link:https://en.wikipedia.org/wiki/Monoid[monoid]
+
+semigroup with identity
+
+==== link:https://en.wikipedia.org/wiki/Free_monoid[free monoid]
+
+
+
+=== link:https://en.wikipedia.org/wiki/Group_(mathematics)[group]
+
+monoid with inverse
+
+=== link:https://en.wikipedia.org/wiki/Symmetric_group[symmetric group]
+
+
+=== link:https://en.wikipedia.org/wiki/Quotient_group[quotient group]
 
 
 == other stuff

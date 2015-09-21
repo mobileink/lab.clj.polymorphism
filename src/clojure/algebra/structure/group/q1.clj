@@ -1,9 +1,9 @@
-(ns algebra.struct.n1
+(ns algebra.structure.group.q1
   (:require [clojure.tools.logging :as log :only [debug info]]))
 
-(defn group-name [_] "Group (N,1,*)")
-(defn id [_] 1)
-(defn struct-kw [_] :n1)
+(defn algebra-name [_] "Group (N,1,*)")
+(defn structure [_] :n1)
+(defn constants [_] {:id 1})
 
 (defn mult
   [t operand1 operand2]
@@ -15,8 +15,8 @@
                                    operand1 " (" (type operand1) "), "
                                    operand2 " (" (type operand2) ")")))))
 
-(defn id? [operand]
-  ;; (if (= (class operand) java.lang.Long)
-  (if (< operand 1)
-    (throw (RuntimeException. (str "Undefined on " operand " (" (type operand))))
-    (= operand 1)))
+;; (defn id? [operand]
+;;   ;; (if (= (class operand) java.lang.Long)
+;;   (if (< operand 1)
+;;     (throw (RuntimeException. (str "Undefined on " operand " (" (type operand))))
+;;     (= operand 1)))

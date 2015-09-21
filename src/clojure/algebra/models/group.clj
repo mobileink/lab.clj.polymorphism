@@ -1,87 +1,87 @@
 (ns algebra.models.group
   (:refer-clojure :exclude [count])
-  (:require [algebra.signature.group :as g]
-            [algebra.signature.group.n0 :as g0]
-            [algebra.signature.group.n1 :as g1]
-            algebra.struct ; deftypes for implementation struct types
-            [algebra.struct.default :as default]
-            [algebra.struct.n0 :as n0]
-            [algebra.struct.n1 :as n1]
-            [algebra.struct.q3 :as q3]
-            [algebra.struct.d0 :as d0]
-            [algebra.struct.d1 :as d1]
-            [algebra.struct.keyword :as kw]
+  (:require [algebra.signature.meta :as m]
+            [algebra.signature.group :as g]
+            ;; [algebra.signature.group.n0 :as g0]
+            ;; [algebra.signature.group.n1 :as g1]
+            types.group ; deftypes for implementation struct types
+            [algebra.structure.group.default :as default]
+            [algebra.structure.group.n0 :as n0]
+            ;; [algebra.structure.group.q1 :as n1]
+            ;; [algebra.structure.group.q3 :as q3]
+            ;; [algebra.structure.group.d0 :as d0]
+            ;; [algebra.structure.group.d1 :as d1]
+            ;; [algebra.structure.group.keyword :as kw]
             [clojure.tools.logging :as log :only [debug info]]
             ))
 
 (println "loading algebra.models.group")
 
-;; an 'extend' expression specifies a model - a mapping from signature
-;; to structure.  specifically it extends the signature of a type to
-;; include some new operations, and maps the new ops to structure
-;; ops (i.e. implementations).
-
 ;; default model
 (extend java.lang.Object
-  g/OpSigGroup
-  {:name (fn [_] "Default group (Z,0,+) with java.lang.Object")
-   :struct-kw default/struct-kw
-   :** default/mult
-   :id default/id
-   :id? default/id?})
+  m/AlgebraMeta {:name default/algebra-name
+                 :structure default/structure
+                 ;; :install! default/install!
+                 ;; :activate! default/activate!
+                 ;; :active-model? default/active-model?
+                 ;; :active-model default/active-model
+                 :constants default/constants}
+  g/Operators {:** default/mult})
 
-;; parameterized models - all calls to these ops will be parameterized
-;; by a type datum.  e.g. instead of (add a b), (add t a b).  the only
-;; purpose of the type parameter is to determine dispatch-by-type -
-;; its value is not used.
+(extend types.group.N0+
+  m/AlgebraMeta {:name n0/algebra-name
+                 :structure n0/structure
+                 ;; :install! n0/install!
+                 ;; :activate! n0/activate!
+                 ;; :active-model? n0/active-model?
+                 ;; :active-model n0/active-model
+                 :constants n0/constants}
+  g/Operators {:** n0/mult})
 
-(extend algebra.struct.N0
-  g/OpSigGroup
-  {:name n0/group-name
-   :struct-kw n0/struct-kw
-   :** n0/mult
-   :id n0/id
-   :id? n0/id?})
+;; (extend types.group.Q1*
+;;   m/AlgebraMeta {:name n1/algebra-name
+;;                  :structure n1/structure
+;;                  :install! n1/install!
+;;                  :activate! n1/activate!
+;;                  :active-model? n1/active-model?
+;;                  :active-model n1/active-model
+;;                  :constants n1/constants}
+;;   g/Operators {:** n1/mult})
 
-(extend algebra.struct.N1
-  g/OpSigGroup
-  {:name n1/group-name
-   :struct-kw n1/struct-kw
-   :** n1/mult
-   :id n1/id
-   :id? n1/id?})
+;; (extend types.group.Q3+
+;;   m/AlgebraMeta {:name q3/algebra-name
+;;                  :structure q3/structure
+;;                  :install! q3/install!
+;;                  :activate! q3/activate!
+;;                  :active-model? q3/active-model?
+;;                  :active-model q3/active-model
+;;                  :constants q3/constants}
+;;   g/Operators {:** q3/mult})
 
-(extend algebra.struct.Q3+
-  g/OpSigGroup
-  {:name q3/group-name
-   :struct-kw q3/struct-kw
-   :** q3/mult
-   :id q3/id
-   :id? q3/id?})
+;; ;;;;;;;;;;;;;;;; other stuff
+;; (extend java.lang.Long
+;;   g0/OpSigGroupN0
+;;   {:** n0/mult}
+;;    ;; :id n0/id
+;;    ;; :id? n0/id?}
+;;   g1/OpSigGroupN1
+;;   {:** n1/mult}
+;;    ;; :id n1/id
+;;    ;; :id? n1/id?}
+;;   )
 
-;;;;;;;;;;;;;;;; other stuff
-(extend java.lang.Long
-  g0/OpSigGroupN0
-  {:** n0/mult
-   ;; :id n0/id
-   :id? n0/id?}
-  g1/OpSigGroupN1
-  {:** n1/mult
-   ;; :id n1/id
-   :id? n1/id?})
+;; (extend java.lang.Double
+;;   g0/OpSigGroupN0
+;;   {:** d0/mult}
+;;    ;; :id d0/id
+;;    ;; :id? d0/id?}
+;;   g1/OpSigGroupN1
+;;   {:** d1/mult})
+;;    ;; :id d1/id
+;;    ;; :id? d1/id?})
 
-(extend java.lang.Double
-  g0/OpSigGroupN0
-  {:** d0/mult
-   ;; :id d0/id
-   :id? d0/id?}
-  g1/OpSigGroupN1
-  {:** d1/mult
-   ;; :id d1/id
-   :id? d1/id?})
-
-(extend clojure.lang.Keyword
-  g/OpSigGroup
-  {:** kw/mult
-   ;; :id kw/id
-   :id? kw/id?})
+;; (extend clojure.lang.Keyword
+;;   g/OpSigGroup
+;;   {:** kw/mult})
+;;    ;; :id kw/id
+;;    ;; :id? kw/id?})

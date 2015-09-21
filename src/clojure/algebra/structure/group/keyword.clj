@@ -1,4 +1,4 @@
-(ns algebra.struct.keyword
+(ns algebra.structure.group.keyword
   (:require [clojure.tools.logging :as log :only [debug info]]))
 
 (defn op2
