@@ -1,0 +1,4 @@
+
+* add some kind of a `valid?` or `contains?` op to be used to express the closure law
+
+* coalgebra examples - e.g. a `stats` protocol for computing mean, mode etc. of collections
