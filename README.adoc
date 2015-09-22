@@ -5,7 +5,11 @@ Lab for experimenting with Clojure link:http://clojure.org/protocols[Protocols].
 This project contains some minimal code intended to demonstrate some
 basic uses of Clojure Protocols.
 
-=== getting started
+* <<start,getting started>>
+* <<algebra,protocols as algebraic signatures>>
+* <<deptypes,emulating dependent types>>
+
+=== [[start]] getting started
 
 1. Fork/clone
 2. `lein repl`, then do `refresh-all` (see dev/user.clj for config stuff)
@@ -34,7 +38,7 @@ user => (** 3 5)
 2
 ----
 
-== Protocols as Algebraic Operator Signatures
+== [[algebra]] Protocols as Algebraic Operator Signatures
 
 Algebra is where logic meets mathematics.  Loosely speaking, an
 algebra is the marriage of a *signature* (which is a formal logical
@@ -173,6 +177,9 @@ monoid with inverse
 
 === link:https://en.wikipedia.org/wiki/Quotient_group[quotient group]
 
+== [[deptypes]] Emulating Dependent Types
+
+from map to foo-map
 
 == other stuff
 
