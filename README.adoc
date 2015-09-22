@@ -215,9 +215,22 @@ pass it to the implementation function, call it `vi4-f`.
 A better way would be to use a multimethod.  The same thing happens,
 but in this case Clojure's built-in dispatching mechanism for
 multimethods will take responsibility for routing the call to the
-appropriate implementation function.
+appropriate implementation function.  Using a multimethod means we
+don't have to give our implementation function a distinct name - it
+will have the same name as the dispatch function, and Clojure will
+take care of the housekeeping.
 
-But with Protocols we can define a function `vi4-f` that will only
-ever be called on data of type VecInt4.
+In both these approaches, there is only one type involve:
+`PersistentVector`.  Protocols allow us to treat VecInt4 as a distinct
+type.
 
-We will still have to inspect the arguments at runtime, but
+[source,clojure]
+----
+(deftype VecInt4 )
+(defprotocol PVecInt4
+  (f ...))
+(extend VecInt4
+  PVecInt4
+  ...)
+----
+
