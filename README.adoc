@@ -181,10 +181,43 @@ monoid with inverse
 
 from map to foo-map
 
-== other stuff
+This is a map:  `{:a 1}`
 
-The code in the `foo` subdir is a more basic example of protocols v. multimethods.
+This is a foo-map:  `{:foo 0, :a 1, :b 2}`
 
+This is a foo-vector:  `[:foo 1 2 3]`
 
-== the problem
+A foo-list:  `'(:foo 1 2 3)`
 
+Clojure's link:http://clojure.org/protocols[Protocol] mechanism
+(together with, say,
+link:https://github.com/Prismatic/schema[Prismatic Schema] and/or
+link:https://github.com/clojure/core.typed[core.typed]) allow us to
+treat these as distinct types.  Since these types depend on a
+particular data value - `:foo` - they thereby emulated dependent
+types.
+
+Another example: type VecInt4 - integer vectors of length 4.  We
+start with a function `f` that operates on vectors:
+
+[source,clojure]
+----
+(defn f [^PersistentVector v] ...do something with v...)
+----
+
+We want a function that only operates on integer vectors or length 4.
+We can easily do this by writing `f` as a dispatch function that
+inspects its argument at runtime and then forwards the call to an
+appropriate implementation function.  If `f` receives an argument that
+is not a vi4 datum, it will throw an exception; otherwise, it will
+pass it to the implementation function, call it `vi4-f`.
+
+A better way would be to use a multimethod.  The same thing happens,
+but in this case Clojure's built-in dispatching mechanism for
+multimethods will take responsibility for routing the call to the
+appropriate implementation function.
+
+But with Protocols we can define a function `vi4-f` that will only
+ever be called on data of type VecInt4.
+
+We will still have to inspect the arguments at runtime, but
