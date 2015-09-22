@@ -1,15 +1,15 @@
-(ns foo.proto.impl.foo
+(ns dependent-types.foo.proto.impl.foo
   (:refer-clojure :exclude [count])
-  (:require [foo.proto.api :as api]
-            [foo.proto.impl.list :as foo-list]
-            [foo.proto.impl.map :as foo-map]
-            [foo.proto.impl.set :as foo-set]
-            [foo.proto.impl.vector :as foo-vector]
-            [foo.proto.impl.lsv :as foo-lsv]
+  (:require [dependent-types.foo.proto.api :as api]
+            [dependent-types.foo.proto.impl.list :as foo-list]
+            [dependent-types.foo.proto.impl.map :as foo-map]
+            [dependent-types.foo.proto.impl.set :as foo-set]
+            [dependent-types.foo.proto.impl.vector :as foo-vector]
+            [dependent-types.foo.proto.impl.lsv :as foo-lsv]
             [clojure.tools.logging :as log :only [debug info]]
             ))
 
-(println "loading foo.proto.impl.foo")
+(println "loading dependent-types.foo.proto.impl.foo")
 
 (extend clojure.lang.IPersistentList
   api/PFoo

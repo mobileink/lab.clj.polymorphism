@@ -1,37 +1,27 @@
-(ns foo.proto.impl.lsv
-  "PFoo implementation common to lists, sets, vectors"
+(ns dependent-types.foo.proto.impl.map
   (:refer-clojure :exclude [count])
   (:require [clojure.tools.logging :as log :only [debug info]]))
 
-(println "loading foo.proto.impl.lsv")
-
-(defn l-or-v-foo?
-  [datum]
-  (log/info "l-or-v-foo?")
-  (some? (some #{:foo} datum)))
-
-(defn m-or-s-foo?
-  [datum]
-  (log/info "m-or-s-foo?")
-  (contains? datum :foo))
+(println "loading dependent-types.foo.proto.impl.map")
 
 (defn count
   "count the int components of datum"
   [datum]
   (log/info "count")
-  (clojure.core/count (filter integer? datum)))
+  (let [is (vals datum)]
+    (clojure.core/count (filter integer? is))))
 
 (defn sum
   "sum the int components of datum"
   [datum]
   (log/info "sum")
-  (reduce + (filter integer? datum)))
+  (reduce + (filter integer? (vals datum))))
 
 (defn mult
   "multiply the int components of datum"
   [datum]
   (log/info "mult")
-  (reduce * (filter integer? datum)))
+  (reduce * (filter integer? (vals datum))))
 
 (defn mean-arith
   "compute the arithmetic mean of the int components of datum"
@@ -48,7 +38,8 @@
 (defn median
   "compute the media of the int components of datum"
   [datum]
-  (let [sorted (sort (filter integer? datum))
+  (log/info "median")
+  (let [sorted (sort (filter integer? (vals datum)))
         c (count datum)
         midPoint  (int (/ c 2))]
     (if (odd? c)
@@ -61,5 +52,5 @@
   "compute the mode of the int components of datum"
   [datum]
   (log/info "mode")
-  (apply max (filter integer? datum)))
+  (apply max (filter integer? (vals datum))))
 

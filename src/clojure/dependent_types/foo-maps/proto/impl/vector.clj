@@ -1,4 +1,4 @@
-(ns foo.proto.impl.list
+(ns dependent-types.foo.proto.impl.vector
   (:require [clojure.tools.logging :as log :only [debug info]]))
 
 (defn median
@@ -7,9 +7,4 @@
   (log/info "median")
   )
 
-(defn mode
-  "compute the mode of the int components of datum"
-  [datum]
-  (log/info "mode")
-  )
 
