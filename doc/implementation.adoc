@@ -1,3 +1,75 @@
+= implementation notes
+
+
+== namespace and code organization
+
+Good namespace management is essential to avoid the dreaded "circular
+dependency" that prevents compilation.  Here's one way to do it:
+
+* goal: clients need only `require` a single namespace - the signature
+  namespace
+
+* the technique involves the following namespace categories:
+
+** _signature_ namespace containing `defprotocol` declarations
+** _model_ namespace containing `extend` declarations
+** _structure_ namespaces containing implementations of the declared protocol operators
+** _typing_ namespaces containing `deftype` declarations (optional)
+
+* Signature namespaces contain `defprotocol` declarations, constants,
+  and any fixed semantic operators in the signature.  The entire
+  collection specifies the signature; in other words, we associate the
+  concept of signature with the namespace that contains `defprotocol`
+  declarations, rather than the defined protocols alone.
+
+* Being abstract, signatures must not refer to model or structure
+  namespaces.  Similarly, client code will only refer to the signature
+  namespace, never the model, structure, or other implementation
+  namespaces.  On the other hand, model, structure, and other
+  implementation namespaces will refer to the signature namespace.
+  For calls to signature operators to work, the model and structure
+  namespaces must be loaded somehow, so that calls to those operators
+  may be dispatched to their implementations.  The natural way to do
+  this, in accordance with the goal of clients needing only one
+  `require`, is to have the signature namespace `require` the model
+  namespace, which in turn will `require` the structure namespaces.
+  The signature can do this because it is only interested in the
+  side-effects caused by loading `deftype` and `defprotocol`
+  declarations, not because it wants to refer to anything in those
+  namespaces by name.  But if the signature `ns` declaration attempts
+  to `:require` the model namespace, a bogus circular dependency is
+  created, which will prevent compilation.  It's bogus because nothing
+  in the signature ns (except for `:require` itself) actually refers
+  to anything in the model ns.  The remedy is to move the `require`
+  declaration to the bottom of the signature ns file, _after_ the
+  `defprotocol` declarations.  So the structure of the signature ns
+  file is:
+
+** define constants
+** define fixed functions
+** declare protocols
+** require typing namespace(s)
+** require model namespace(s)
+
+* Model namespaces - those containing only the `extend` declarations
+  that map protocol operators to implementation functions - are loaded
+  for side-effects, not reference.  Model namespaces must refer to
+** signature namespaces, in order to refer to protocols by name in
+   `extend` declarations
+** implementation namespaces
+
+* Model namespaces _may_ refer to types declared using `deftype` in
+  typing namespaces.  The typing namespaces should not be required by
+  the model namespace; rather, they should be required by the
+  signature namespace as the first thing loaded _after_ the
+  `defprotocol` declarations.
+
+* Typing namespaces.  Deftypes may complement defprotocols.
+
+TODO: what about gen-class, gen-interface, etc.?
+
+== misc
+
 an 'extend' expression specifies a model - a mapping from signature to
 structure.  specifically it extends the signature of a type to include
 some new operations, and maps the new ops to structure ops

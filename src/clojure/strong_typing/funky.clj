@@ -1,0 +1,1 @@
+(ns strong-typing.funky)

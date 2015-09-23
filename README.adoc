@@ -166,16 +166,29 @@ semigroup with identity
 
 ==== link:https://en.wikipedia.org/wiki/Free_monoid[free monoid]
 
-
-
 === link:https://en.wikipedia.org/wiki/Group_(mathematics)[group]
 
 monoid with inverse
 
-=== link:https://en.wikipedia.org/wiki/Symmetric_group[symmetric group]
+==== link:https://en.wikipedia.org/wiki/Abelian_group[Abelian group]
 
+closure, associativity, identity, inverses, commutativity
 
-=== link:https://en.wikipedia.org/wiki/Quotient_group[quotient group]
+==== link:https://en.wikipedia.org/wiki/Symmetric_group[symmetric group]
+
+==== link:https://en.wikipedia.org/wiki/Quotient_group[quotient group]
+
+=== link:https://en.wikipedia.org/wiki/Ring_(mathematics)[Ring]
+
+Two ops, addition and multiplication; abelian group under addition,
+monoid under multiplication; multiplication is distributive w/r/t
+addition.
+
+=== link:https://en.wikipedia.org/wiki/Field_(mathematics)[Field]
+
+Ring where multiplication is also commutative - both + and * are abelian
+
+=== link:https://en.wikipedia.org/wiki/Vector_space#Definition[Vector Space]
 
 == [[deptypes]] Emulating Dependent Types
 
