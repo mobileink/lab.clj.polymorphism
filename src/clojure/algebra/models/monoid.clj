@@ -26,7 +26,8 @@
                  ;; :active-model default/active-model
   monoid/Operators {:** default/mult
                     :constants default/constants
-                    :structure default/structure})
+                    :structure default/structure
+                    :type default/type})
 
 ;; parameterized models
 (extend types.monoid.N0

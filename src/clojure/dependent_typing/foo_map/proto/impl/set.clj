@@ -1,15 +1,15 @@
-(ns dependent-types.foo.proto.impl.list
+(ns dependent-typing.foo-map.proto.impl.set
   (:require [clojure.tools.logging :as log :only [debug info]]))
 
 (defn median
   "compute the media of the int components of datum"
   [datum]
-  (log/info "median")
+  (log/debug "median")
   )
 
 (defn mode
   "compute the mode of the int components of datum"
   [datum]
-  (log/info "mode")
+  (log/debug "mode")
   )
 

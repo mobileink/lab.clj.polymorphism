@@ -1,8 +1,8 @@
-(ns dependent-types.foo.multi.count
+(ns dependent-typing.foo-map.multi.count
   (:refer-clojure :exclude [count])
   (:require [clojure.tools.logging :as log :only [debug info]]))
 
-(clojure.core/println "loading dependent-types.foo.proto.api")
+(clojure.core/println "loading dependent-typing.foo-map.proto.api")
 
 ;; (defprotocol PFoo
 ;;   "protocol for Foo datatype"

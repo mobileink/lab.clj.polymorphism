@@ -11,6 +11,7 @@
 ;; operators
 (defprotocol Operators
   "Operator Signature for Monoids"
+  (type [t])
   (structure [t]) ;; returns Keyword
   (** [arg1 arg2] [t arg1 arg2])
   (constants [t]))

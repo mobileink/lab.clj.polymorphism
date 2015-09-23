@@ -6,6 +6,8 @@
 ;;;; operators
 (defn algebra-name [_] "Default Monoid (Z,0,+) with java.lang.Object")
 
+(defn type [t] t)
+
 (defn structure [_] :default)
 
 (defn constants [_] {:id 0})

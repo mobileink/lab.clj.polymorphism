@@ -1,4 +1,4 @@
-(ns dependent-types.foo.proto.impl.vector
+(ns dependent-typing.foo-map.proto.impl.vector
   (:require [clojure.tools.logging :as log :only [debug info]]))
 
 (defn median

@@ -1,9 +1,9 @@
-(ns dependent-types.foo.proto.core
-  (:require [dependent-types.foo.proto.api :as foo]
+(ns dependent-typing.foo-map.proto.core
+  (:require [dependent-typing.foo-map.proto.api :as foo]
             [clojure.data.generators :as g]
             [clojure.tools.logging :as log :only [debug info]]))
 
-(clojure.core/println "loading dependent-types.foo.proto.core")
+(clojure.core/println "loading dependent-typing.foo-map.proto.core")
 
 ;; create some test data
 

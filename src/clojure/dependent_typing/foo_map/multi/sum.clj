@@ -1,6 +1,6 @@
-(in-ns 'dependent-types.foo.multi.core)
+(in-ns 'dependent-typing.foo-map.multi.core)
 
-(clojure.core/println "loading dependent-types.foo.multi.sum")
+(clojure.core/println "loading dependent-typing.foo-map.multi.sum")
 
 (defn l-or-v-sum
   [datum]

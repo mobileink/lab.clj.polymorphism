@@ -1,9 +1,9 @@
-(ns dependent-types.foo.multi.core
+(ns dependent-typing.foo-map.multi.core
   (:refer-clojure :exclude [count])
-  (:require [dependent-types.foo.multi.count :refer :all]
+  (:require [dependent-typing.foo-map.multi.count :refer :all]
             [clojure.tools.logging :as log :only [debug info]]))
 
-(clojure.core/println "loading dependent-types.foo.proto.api")
+(clojure.core/println "loading dependent-typing.foo-map.proto.api")
 
 ;; an api the multimethod way.
 
