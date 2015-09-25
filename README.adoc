@@ -8,6 +8,10 @@ basic uses of Clojure Protocols.
 * <<start,getting started>>
 * <<protocols,protocols>>
 * <<algebra,protocols as algebraic signatures>>
+** <<sigs,signatures>>
+** <<structs,structures>>
+** <<models,models>>
+* <<impl,implementation>>
 * <<deptypes,emulating dependent types>>
 
 === [[start]] getting started
@@ -215,9 +219,16 @@ However, to really make this work - to make it possible to switch from
 one model to another (swap implementations) - you need more than just
 `defprotocol` and friends.
 
-=== the technique
+=== [[sigs]] signatures
 
-The trick, which I learned from
+=== [[structs]] structures
+
+=== [[models]] models
+
+
+=== [[impl]] implementation techniques
+
+One implementation trick, which I learned from
 link:https://github.com/mikera/core.matrix[core.matrix], is to exploit
 the fact that Clojure's Protocol mechanism dispatches function calls
 on the first arg.  Knowing this, we just parameterize operation calls
