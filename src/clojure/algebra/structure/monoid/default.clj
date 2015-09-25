@@ -6,13 +6,24 @@
 ;;;; operators
 (defn algebra-name [_] "Default Monoid (Z,0,+) with java.lang.Object")
 
-(defn type [t] t)
+(defn typ [t]
+  (log/debug "type" t)
+  (if (not= g/*active-model* :default)
+    (do
+      (log/debug "dispatching to " *active-model*)
+      (let [param (g/dispatch-type)]
+        (log/debug "param: " (class param))
+        (g/typ param t)))
+    (type t)
+    ))
 
 (defn structure [_] :default)
 
 (defn constants [_] {:id 0})
 
 ;; operators
+(defn idem [a] a)
+
 (defn mult
   [operand1 operand2]
   (log/info "mult" operand1 operand2 g/*active-model*)

@@ -25,9 +25,10 @@
                  ;; :active-model? default/active-model?
                  ;; :active-model default/active-model
   monoid/Operators {:** default/mult
+                    ;; :idem default/idem
                     :constants default/constants
                     :structure default/structure
-                    :type default/type})
+                    :typ default/typ})
 
 ;; parameterized models
 (extend types.monoid.N0
@@ -47,8 +48,10 @@
                  ;; :active-model? n1/active-model?
                  ;; :active-model n1/active-model
   monoid/Operators {:** n1/mult
+                    ;; :idem n1/idem
                     :structure n1/structure
-                    :constants n1/constants})
+                    :constants n1/constants
+                    :typ n1/typ})
 
 ;; (extend types.monoid.Q3+
 ;;   m/AlgebraMeta {:name q3/algebra-name}

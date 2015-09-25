@@ -1,9 +1,18 @@
 (ns algebra.signature.monoid
   (:refer-clojure :exclude [name])
-  (:require ;algebra.models.monoid
+  (:require [potemkin :refer :all]
+            [algebra.signature.magma :as magma]
             [clojure.tools.logging :as log :only [debug info]]))
 
 (clojure.core/println "loading algebra.signature.monoid")
+
+(import '(algebra.signature.magma.Operators))
+
+;(import-vars [algebra.signature [magma]])
+;; (import-fn magma/mag)
+;; (import-fn magma/magfn)
+
+;;(defn foo [] (Operators/magfn 3 3 4))
 
 ;; constants
 (def id (atom 0))
@@ -11,24 +20,23 @@
 ;; operators
 (defprotocol Operators
   "Operator Signature for Monoids"
-  (type [t])
-  (structure [t]) ;; returns Keyword
-  (** [arg1 arg2] [t arg1 arg2])
+  (typ [a] [t a])
+;  (idem [a] [t a])
+  (structure [a] [t a]) ;; returns Keyword
+  (** [a b] [t a b])
   (constants [t]))
 
 ;; laws
-(declare dispatch-type)
+(declare dispatch-type get-struct-kw try-load-model)
 
 (defn closure
-  [a b]
-  (log/info "monoid law: associativity")
-  (let [s (** a b)
-        log (log/debug "type sum: " (type s))
-        dt (dispatch-type)
+  [a]
+  (log/info "monoid law: associativity" a)
+  (let [dt (dispatch-type)
         log (log/debug "dispatch type: " dt)]
-    (if-let [t (= (class s) (class dt))]
+    (if-let [t (= (typ a) (class dt))]
       true
-      (throw (RuntimeException. (str "dt: " (class dt) " not= " (class s)))))))
+      (throw (RuntimeException. (str "dt: " (class dt) " not= " (class a)))))))
 
 (defn associativity
   [a b c]
@@ -38,6 +46,8 @@
     (log/debug "(a * b) * c " s1)
     (log/debug "a * (b * c) " s2)
     (println "(a ** b) ** c = a ** (b ** c) ?  " (= s1 s2))))
+
+(require '(algebra.models.monoid))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; meta operations - part of the public sig, but constant across models (i.e. non-semantic ops)
@@ -53,7 +63,36 @@
 (def ^:dynamic *active-model* :default)
 
 ;; map struct keys to dispatch param objects
+;; FIXME: call this struct-types? it represents the type of the
+;; underlying structure, which happens to be used for dispatch
 (defonce dispatch-types (atom {}))
+
+(defn dispatch-type ;; FIXME struct-type?
+  "Gets the struct object for a keyword or struct.  The struct object
+  will be used to parameterize Group operations by struct type; in
+  effect this is a way of dynamically selecting a model to determine
+  the interpretion of an operation.
+
+  Arg is keyword-or-struct."
+  ([]
+   (do
+     ;; (log/debug "dispatch-type 0")
+     (dispatch-type *active-model*)))
+  ([kors]
+   (do
+     ;; (log/debug "dispatch-type 1" kors)
+    (let [k (get-struct-kw kors)
+          ;; log (log/debug "struct k: " k)
+          obj (@dispatch-types k)
+          ;; log (log/debug "struct: " obj)
+          ]
+      (if k
+        (or obj
+           (if (try-load-model k) (@dispatch-types k))
+           ;; Why? (when-not (keyword? m) m)
+           nil)
+        nil)))))
+
 (declare try-load-model get-struct-kw dispatch-type)
 
 (defn activate!
@@ -138,29 +177,3 @@
            (catch Throwable t nil)))
        ;; (log/debug "struct " k "not found")
        ))))
-
-(defn dispatch-type
-  "Gets the struct object for a keyword or struct.  The struct object
-  will be used to parameterize Group operations by struct type; in
-  effect this is a way of dynamically selecting a model to determine
-  the interpretion of an operation.
-
-  Arg is keyword-or-struct."
-  ([]
-   (do
-     ;; (log/debug "dispatch-type 0")
-     (dispatch-type *active-model*)))
-  ([kors]
-   (do
-     ;; (log/debug "dispatch-type 1" kors)
-    (let [k (get-struct-kw kors)
-          ;; log (log/debug "struct k: " k)
-          obj (@dispatch-types k)
-          ;; log (log/debug "struct: " obj)
-          ]
-      (if k
-        (or obj
-           (if (try-load-model k) (@dispatch-types k))
-           ;; Why? (when-not (keyword? m) m)
-           nil)
-        nil)))))

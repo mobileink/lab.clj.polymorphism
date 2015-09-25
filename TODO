@@ -1,4 +1,13 @@
 
-* add some kind of a `valid?` or `contains?` op to be used to express the closure law
+* "inheritance" - each algebra extends the previous one; a group is a
+  monoid with commutativity.  reuse the code.  so for group sig, just
+  declare commutativity law, and reuse the monoid protocol?  we cannot
+  extend a protocol, but we can, in the model, extend a type to
+  multiple protocols.  so we will have to put the laws in the protocol
+  instead of just the namespace.  and we will have to figure out how
+  to make the protocol operators from monoid available from the group
+  namespace.
+
+    link:https://github.com/ztellman/potemkin[potemkin]?
 
 * coalgebra examples - e.g. a `stats` protocol for computing mean, mode etc. of collections

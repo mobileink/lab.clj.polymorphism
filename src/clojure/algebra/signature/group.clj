@@ -1,9 +1,11 @@
 (ns algebra.signature.group
   (:refer-clojure :exclude [name])
-  (:require ;;algebra.models.group
+  (:require [potemkin :as pot]
             [clojure.tools.logging :as log :only [debug info]]))
 
 (clojure.core/println "loading algebra.signature.group")
+
+(pot/import-vars [algebra.signature.magma])
 
 ;; constants
 (defonce id (atom 0))
@@ -11,8 +13,9 @@
 ;; operators
 (defprotocol Operators
   "Operator Signature for Groups"
-  (** [arg1 arg2] [t arg1 arg2])
-  (constants [t]))
+  (commutativity [a] [t a]))
+  ;; (** [arg1 arg2] [t arg1 arg2])
+  ;; (constants [t]))
 
 ;; laws
 (defn closure [arg1 arg2])

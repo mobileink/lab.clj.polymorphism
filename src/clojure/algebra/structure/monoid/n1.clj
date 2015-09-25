@@ -5,6 +5,10 @@
 (defn structure [_] :n1)
 (defn constants [_] {:id 1})
 
+(defn typ [t a]
+  (log/debug "type" a)
+  (class t))
+
 (defn mult
   [t operand1 operand2]
   (log/info "mult")

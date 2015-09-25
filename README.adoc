@@ -6,6 +6,7 @@ This project contains some minimal code intended to demonstrate some
 basic uses of Clojure Protocols.
 
 * <<start,getting started>>
+* <<protocols,protocols>>
 * <<algebra,protocols as algebraic signatures>>
 * <<deptypes,emulating dependent types>>
 
@@ -38,7 +39,121 @@ user => (** 3 5)
 2
 ----
 
-== [[algebra]] Protocols as Algebraic Operator Signatures
+== [[protocols]] protocols
+
+You use `defprotocol` to declare a protocol.  Note that this "defines"
+a protocol object but only "declares" its operators.  Furthermore
+`defprotocol` is one of those pseudo-functions, like `def`, whose main
+purpose is a side-effect; `def` has the side-effect of interning a var
+(thus altering the environment), and `defprotocol` does something
+similar: it constructs a map representing the protocol and interns a
+var constructed using the current namespace and the name parameter of
+the declaration.  Instead of returning this map as the "value",
+defprotocol interns it and returns the name parameter.
+
+You can inspect the (side-) result of `defprotocol`:
+
+[source,clojure]
+----
+user=> (require '(clojure [pprint :as pp]))
+user=> (def p (defprotocol P "test protocol" (f [t])))
+#'user/p
+user=> (type p)
+clojure.lang.Symbol
+user=> (pp/pprint p)
+P
+nil
+user=> (pp/pprint P)
+{:on user.P,
+ :on-interface user.P,
+ :doc "test protocol",
+ :sigs
+ {:f1 {:name f1, :arglists ([t]), :doc nil},
+  :f2 {:name f2, :arglists ([t a]), :doc nil}},
+ :var #'user/P,
+ :method-map {:f1 :f1, :f2 :f2},
+ :method-builders
+ {#'user/f2
+  #object[user$fn__14240 0x39f583af "user$fn__14240@39f583af"],
+  #'user/f1
+  #object[user$fn__14253 0x19811f83 "user$fn__14253@19811f83"]}}
+nil
+user=>
+
+----
+
+First off, notice that we're looking at a map that is the value of the
+var `#'user/P`: `user=> (= (var P) (:var P))`.  If you deref `(:var
+P)` you'll see the same map you get by printing P.
+
+Notice the `:method-builders` key: its value is a map from vars to
+objects.  From the names we can infer they are function objects, but
+let's confirm that:
+
+[source,clojure]
+----
+user=> (clojure.test/function? (get-in P [:method-builders #'user/f1]))
+true
+
+----
+
+
+The form of the method-builder vars tells use that in fact there is
+another side-effect of executing `defprotocol`: it also interns the
+functions of the protocol in the current environment.
+
+Yet another side-effect: `defprotocol` generates a Java Interface.  From the docstring:
+
+****
+
+defprotocol will automatically generate a corresponding interface,
+with the same name as the protocol, i.e. given a protocol:
+my.ns/Protocol, an interface: my.ns.Protocol. The interface will have
+methods corresponding to the protocol functions, and the protocol will
+automatically work with instances of the interface.
+
+****
+
+Let's have a look:
+
+[source,clojure]
+----
+user=> (type user/P)
+clojure.lang.PersistentArrayMap
+user=> (require '(clojure [reflect :as r]))
+user=> (type user.P)
+java.lang.Class
+user=> (pp/pprint (r/reflect user.P))
+{:bases nil,
+ :flags #{:interface :public :abstract},
+ :members
+ #{{:name f2,
+    :return-type java.lang.Object,
+    :declaring-class user.P,
+    :parameter-types [java.lang.Object],
+    :exception-types [],
+    :flags #{:public :abstract}}
+   {:name f1,
+    :return-type java.lang.Object,
+    :declaring-class user.P,
+    :parameter-types [],
+    :exception-types [],
+    :flags #{:public :abstract}}}}
+----
+
+*Make a note of this example using pprint and clojure.reflect to
+ inspect the side-effect products of defprotocol - the Clojure
+ protocol map and the Java Interface.!* It will come in very handy
+ the first time you run in to the dreaded "No single method" exception
+ (see below, <<troubleshooting,troubleshooting>>.)
+
+Contrast this with `deftype`, which "[d]ynamically generates compiled
+bytecode for class with the given name, in a package with the same
+name as the current namespace..." but does not intern a var for the
+type in the current namespace.
+
+
+== [[algebra]] Protocols as Algebraic Operator Signatures ==
 
 Algebra is where logic meets mathematics.  Loosely speaking, an
 algebra is the marriage of a *signature* (which is a formal logical
@@ -125,7 +240,7 @@ can learn the technique independent of matrix stuff.  Also, I wanted
 to highlight the algebraic structure of the technique, which I've
 tried to do by using the algebraic terminology of signature,
 structure, and model, and organizing the code accordingly.
- 
+
 The way I do it here is slightly different than the way core.matrix
 does it.  I use a default implementation (defined on java.lang.Object)
 to manage dispatch.  So calls to Protocol functions are always sent to
@@ -247,3 +362,22 @@ type.
   ...)
 ----
 
+= [[troubleshooting]] troubleshooting
+
+"No single method: M of interface: I found for function: F of protocol: P"
+
+Note the reference to by interface and protocol: it's going from
+function-in-protocol (Clojure) to method-in-interface (Java).  The
+interface is generated at runtime by defprotcol.
+
+"IllegalArgumentException No implementation of method: M of protocol: #'P found for class: K"
+
+Self-explanatory.
+
+
+Useful tools:
+
+* tools.namespace
+* clojure.reflect
+* clojure.pprint
+* link:http://z.caudate.me/jvm-class-reflection-made-simple/[iroh]?  "a library to inspect, manipulate and game the jvm."
