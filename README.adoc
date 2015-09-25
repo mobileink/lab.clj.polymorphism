@@ -109,14 +109,17 @@ functions of the protocol in the current environment.
 Yet another side-effect: `defprotocol` generates a Java Interface.  From the docstring:
 
 ****
-
 defprotocol will automatically generate a corresponding interface,
 with the same name as the protocol, i.e. given a protocol:
 my.ns/Protocol, an interface: my.ns.Protocol. The interface will have
 methods corresponding to the protocol functions, and the protocol will
 automatically work with instances of the interface.
-
 ****
+
+NB: more precisely: defprotocol will call gen-interface, which will
+define the corresponding class (using
+java.lang.ClassLoader.defineClass).  Under aot compilation, it will
+also write the bytecode to disk.
 
 Let's have a look:
 
