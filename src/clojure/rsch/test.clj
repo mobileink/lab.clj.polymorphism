@@ -29,7 +29,7 @@
                       :ns a.b
                       :universe {:sym 'U, :restriction (fn [a] (> a 3))}
                       :constants #{:e}
-                      :operators [(mon1 [a] "monoid operation f1")]
+                      ;; :operators [(mon1 [a] "monoid operation f1")]
                       :laws {:idenity #(= (mon1 % e) %)})
 
 (pprint a.b/Monoid)
@@ -77,7 +77,7 @@
              :impl {:type java.lang.Long ; implementation type
                     :restriction #(> % -1)}}
   :constants {:e 0}
-  :operators {:* +, :mon1 /})
+  :operators {:* +})
 
 (pprint foo.bar/MonN0+)
 
@@ -86,7 +86,7 @@
              :impl {:type java.lang.Long ; implementation type
                     :restriction pos?}}
   :constants {:e 1}
-  :operators {:* *, :mon1 /})
+  :operators {:* *})
 
 (pprint foo.bar/MonN1*)
 
@@ -95,8 +95,7 @@
              :impl {:type java.lang.Long ; implementation type
                     :restriction #(> % -1)}}
   :constants {:e 0}
-  :operators {:* +, :mon1 identity,
-              :inv #(- %)})
+  :operators {:* +, :inv #(- %)})
 
 (pprint foo.bar/GrpN1*)
 
@@ -105,7 +104,7 @@
              :impl {:type java.lang.Long ; implementation type
                     :restriction pos?}}
   :constants {:e 1}
-  :operators {:* *, :mon1 identity, :inv (fn [a] (/ 1 a))})
+  :operators {:* *, :inv (fn [a] (/ 1 a))})
 
 (pprint foo.bar/GrpN1*)
 
@@ -116,7 +115,6 @@
                     :restriction #(> % -1)}}
   :constants {:e 0}
   :operators {:* (fn [a b] (mod (+ a b) 3))
-              :mon1 identity,
               :inv (fn [a] (- 3 (mod a 3)))})
 
 (pprint foo.bar/GrpMod3-N0+)
