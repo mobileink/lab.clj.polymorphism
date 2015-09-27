@@ -1,6 +1,18 @@
-= lab.clj.protocols
+= lab.clj.polymorphism
 
-Lab for experimenting with Clojure link:http://clojure.org/protocols[Protocols].
+Lab for experimenting with polymorphism mechanisms in Clojure.
+
+* <<arities,arities>>
+* <<multimethods,multimethods>>
+* <<protocols,protocols>>
+* <<multimodels,multimodels>>
+* <<misc,misc>>
+
+== [[arities]] arities
+
+== multimethods
+
+== link:http://clojure.org/protocols[protocols]
 
 This project contains some minimal code intended to demonstrate some
 basic uses of Clojure Protocols.
@@ -388,6 +400,9 @@ interface is generated at runtime by defprotcol.
 
 Self-explanatory.
 
+== [[multimodels]] multimodels
+
+== [[misc]] misc
 
 Useful tools:
 
