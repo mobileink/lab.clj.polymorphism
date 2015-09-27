@@ -1,0 +1,99 @@
+= algebras
+
+Roughly speaking, and algebra is a set of symbols mapped to a set of
+semantic values, plus a set of rules governing the behavior or the
+symbols.  Wikipedia says "In mathematics, and more specifically in
+abstract algebra, the term algebraic structure generally refers to a
+set (called carrier set or underlying set) with one or more finitary
+operations defined on it that satisfies a some list of axioms."
+(link:https://en.wikipedia.org/wiki/Algebraic_structure[Algebraic
+Structure]).
+
+There are a variety of was to express the idea of an algebra more
+formally.  For example, in
+link:https://en.wikipedia.org/wiki/Universal_algebra[Universal
+Algebra] an algebra (or algebraic structure) is "a set A together with
+a collection of operations on A."  This view corresponds to the notion
+of algebraic structure expressed above; notice that under this view
+what matters is the mathematical structure: a set with operations,
+without regard to the language we use to talk about such structures.
+A different view comes from both logic and
+link:https://en.wikipedia.org/wiki/Model_theory[Model Theory], which
+make an explicit distinction between the symbol set (or
+link:https://en.wikipedia.org/wiki/Signature_(logic)[signature]) of an
+algebra and its carrier set.
+
+The model-theoretic perspective is more finely articulated, in that it
+distinguishes between three distinct components of an algebra:
+
+* a _signature_, which is a set of symbols of different arities
+
+* a set of rules (axioms) governing the formal behavior of the symbols
+
+* a _structure_, which is an abstract mathematical collection of
+  values and functions on those values
+
+* a _model_, which is a mapping from the signature to the structure
+  under which the axioms come out as true
+
+Note that a signature is a purely formal _linguistic_ device, while
+therefore devoid of meaning, and a structure is a purely informal and
+_extra-linguistic_ device, and therefore devoid of expressibility.
+Signatures only become meaningful, and structures expressible, _under
+a model_; that is, when we have agreed on a mapping from the one to
+the other.
+
+But even this is not quite satisfactory.  It's easy to imagine that
+different structures could satisfy the axioms of a particular algebra
+
+Some simple examples.
+
+== some algebras
+
+=== link:https://en.wikipedia.org/wiki/Magma_(algebra)[magma]
+
+"a set, M, equipped with a single binary operation, M × M → M. The binary operation must be closed by definition but no other properties are imposed."
+
+"For all a, b in M, the result of the operation a • b is also in M." (link:https://en.wikipedia.org/wiki/Magma_(algebra)#Definition[magma])
+
+Example:  Cayley table (link:http://math.stackexchange.com/questions/779507/can-you-give-me-some-concrete-examples-of-magmas[])
+
+link:http://arxiv.org/ftp/math/papers/0304/0304490.pdf[]
+
+
+=== link:https://en.wikipedia.org/wiki/Semigroup[semigroup]
+
+set with associative binary combinator; an associative magma
+
+link:https://en.wikipedia.org/wiki/Semigroup#Definition[definition]: "A semigroup is a set S together with a binary operation "\cdot" (that is, a function \cdot:S\times S\rightarrow S) that satisfies the associative property"
+
+=== link:https://en.wikipedia.org/wiki/Monoid[monoid]
+
+semigroup with identity
+
+==== link:https://en.wikipedia.org/wiki/Free_monoid[free monoid]
+
+=== link:https://en.wikipedia.org/wiki/Group_(mathematics)[group]
+
+monoid with inverse
+
+==== link:https://en.wikipedia.org/wiki/Abelian_group[Abelian group]
+
+closure, associativity, identity, inverses, commutativity
+
+==== link:https://en.wikipedia.org/wiki/Symmetric_group[symmetric group]
+
+==== link:https://en.wikipedia.org/wiki/Quotient_group[quotient group]
+
+=== link:https://en.wikipedia.org/wiki/Ring_(mathematics)[Ring]
+
+Two ops, addition and multiplication; abelian group under addition,
+monoid under multiplication; multiplication is distributive w/r/t
+addition.
+
+=== link:https://en.wikipedia.org/wiki/Field_(mathematics)[Field]
+
+Ring where multiplication is also commutative - both + and * are abelian
+
+=== link:https://en.wikipedia.org/wiki/Vector_space#Definition[Vector Space]
+
