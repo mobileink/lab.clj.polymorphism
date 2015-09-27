@@ -2,11 +2,14 @@
 
 Lab for experimenting with polymorphism mechanisms in Clojure.
 
+* <<overview,overview>>
 * <<arities,arities>>
 * <<multimethods,multimethods>>
 * <<protocols,protocols>>
 * <<multimodels,multimodels>>
 * <<misc,misc>>
+
+== [[overview]] overview: polymorphisms and algebras
 
 == [[arities]] arities
 
@@ -65,7 +68,7 @@ purpose is a side-effect; `def` has the side-effect of interning a var
 similar: it constructs a map representing the protocol and interns a
 var constructed using the current namespace and the name parameter of
 the declaration.  Instead of returning this map as the "value",
-defprotocol interns it and returns the name parameter.
+defprotocol interns it and returns the var.
 
 You can inspect the (side-) result of `defprotocol`:
 
@@ -113,10 +116,13 @@ true
 
 ----
 
-
 The form of the method-builder vars tells use that in fact there is
 another side-effect of executing `defprotocol`: it also interns the
-functions of the protocol in the current environment.
+functions of the protocol in the current environment.  To see the
+evidence, run `(dir user)` in a fresh repl to see the list of interned
+vars; then execute `defprotocol`, then run `(dir user)` again; you
+should see the protocol symbol and the protocol functions listed as
+interned vars.
 
 Yet another side-effect: `defprotocol` generates a Java Interface.  From the docstring:
 
@@ -281,55 +287,6 @@ to ensure that the user API always matches the Protocol signature.
 And also just to experiment.  I don't know which technique is
 preferable.
 
-
-== some algebras
-
-=== link:https://en.wikipedia.org/wiki/Magma_(algebra)[magma]
-
-"a set, M, equipped with a single binary operation, M × M → M. The binary operation must be closed by definition but no other properties are imposed."
-
-"For all a, b in M, the result of the operation a • b is also in M." (link:https://en.wikipedia.org/wiki/Magma_(algebra)#Definition[magma])
-
-Example:  Cayley table (link:http://math.stackexchange.com/questions/779507/can-you-give-me-some-concrete-examples-of-magmas[])
-
-link:http://arxiv.org/ftp/math/papers/0304/0304490.pdf[]
-
-
-=== link:https://en.wikipedia.org/wiki/Semigroup[semigroup]
-
-set with associative binary combinator; an associative magma
-
-link:https://en.wikipedia.org/wiki/Semigroup#Definition[definition]: "A semigroup is a set S together with a binary operation "\cdot" (that is, a function \cdot:S\times S\rightarrow S) that satisfies the associative property"
-
-=== link:https://en.wikipedia.org/wiki/Monoid[monoid]
-
-semigroup with identity
-
-==== link:https://en.wikipedia.org/wiki/Free_monoid[free monoid]
-
-=== link:https://en.wikipedia.org/wiki/Group_(mathematics)[group]
-
-monoid with inverse
-
-==== link:https://en.wikipedia.org/wiki/Abelian_group[Abelian group]
-
-closure, associativity, identity, inverses, commutativity
-
-==== link:https://en.wikipedia.org/wiki/Symmetric_group[symmetric group]
-
-==== link:https://en.wikipedia.org/wiki/Quotient_group[quotient group]
-
-=== link:https://en.wikipedia.org/wiki/Ring_(mathematics)[Ring]
-
-Two ops, addition and multiplication; abelian group under addition,
-monoid under multiplication; multiplication is distributive w/r/t
-addition.
-
-=== link:https://en.wikipedia.org/wiki/Field_(mathematics)[Field]
-
-Ring where multiplication is also commutative - both + and * are abelian
-
-=== link:https://en.wikipedia.org/wiki/Vector_space#Definition[Vector Space]
 
 == [[deptypes]] Emulating Dependent Types
 
