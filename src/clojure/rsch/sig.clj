@@ -8,170 +8,10 @@
 
 (clojure.core/println "loading ns" *ns*)
 
-;; (defn- is-annotation? [c]
-;;   (and (class? c)
-;;        (.isAssignableFrom java.lang.annotation.Annotation c)))
-
-;; (defn- is-runtime-annotation? [^Class c]
-;;   (boolean 
-;;    (and (is-annotation? c)
-;;         (when-let [^java.lang.annotation.Retention r 
-;;                    (.getAnnotation c java.lang.annotation.Retention)] 
-;;           (= (.value r) java.lang.annotation.RetentionPolicy/RUNTIME)))))
-
-;; (defn- descriptor [^Class c] (clojure.asm.Type/getDescriptor c))
-
-;; (declare process-annotation)
-;; (defn- add-annotation [^clojure.asm.AnnotationVisitor av name v]
-;;   (cond
-;;    (vector? v) (let [avec (.visitArray av name)]
-;;                  (doseq [vval v]
-;;                    (add-annotation avec "value" vval))
-;;                  (.visitEnd avec))
-;;    (symbol? v) (let [ev (eval v)]
-;;                  (cond 
-;;                   (instance? java.lang.Enum ev)
-;;                   (.visitEnum av name (descriptor (class ev)) (str ev))
-;;                   (class? ev) (.visit av name (clojure.asm.Type/getType ev))
-;;                   :else (throw (IllegalArgumentException. 
-;;                                 (str "Unsupported annotation value: " v " of class " (class ev))))))
-;;    (seq? v) (let [[nested nv] v
-;;                   c (resolve nested)
-;;                   nav (.visitAnnotation av name (descriptor c))]
-;;               (process-annotation nav nv)
-;;               (.visitEnd nav))
-;;    :else (.visit av name v)))
-
-;; (defn- process-annotation [av v]
-;;   (if (map? v) 
-;;     (doseq [[k v] v]
-;;       (add-annotation av (name k) v))
-;;     (add-annotation av "value" v)))
-
-;; (defn- add-annotations
-;;   ([visitor m] (add-annotations visitor m nil))
-;;   ([visitor m i]
-;;      (doseq [[k v] m]
-;;        (when (symbol? k)
-;;          (when-let [c (resolve k)]
-;;            (when (is-annotation? c)
-;;                                         ;this is known duck/reflective as no common base of ASM Visitors
-;;              (let [av (if i
-;;                         (.visitParameterAnnotation visitor i (descriptor c) 
-;;                                                    (is-runtime-annotation? c))
-;;                         (.visitAnnotation visitor (descriptor c) 
-;;                                           (is-runtime-annotation? c)))]
-;;                (process-annotation av v)
-;;                (.visitEnd av))))))))
-
-
-;; (def ^{:private true} prim->class
-;;      {'int Integer/TYPE
-;;       'ints (Class/forName "[I")
-;;       'long Long/TYPE
-;;       'longs (Class/forName "[J")
-;;       'float Float/TYPE
-;;       'floats (Class/forName "[F")
-;;       'double Double/TYPE
-;;       'doubles (Class/forName "[D")
-;;       'void Void/TYPE
-;;       'short Short/TYPE
-;;       'shorts (Class/forName "[S")
-;;       'boolean Boolean/TYPE
-;;       'booleans (Class/forName "[Z")
-;;       'byte Byte/TYPE
-;;       'bytes (Class/forName "[B")
-;;       'char Character/TYPE
-;;       'chars (Class/forName "[C")})
-
-;; (defn- ^Class the-class [x]
-;;   (cond
-;;    (class? x) x
-;;    (contains? prim->class x) (prim->class x)
-;;    :else (let [strx (str x)]
-;;            (clojure.lang.RT/classForName
-;;             (if (some #{\. \[} strx)
-;;               strx
-;;               (str "java.lang." strx))))))
-
-;; (defn- ^Type asm-type
-;;   "Returns an asm Type object for c, which may be a primitive class
-;;   (such as Integer/TYPE), any other class (such as Double), or a
-;;   fully-qualified class name given as a string or symbol
-;;   (such as 'java.lang.String)"
-;;   [c]
-;;   (if (or (instance? Class c) (prim->class c))
-;;     (Type/getType (the-class c))
-;;     (let [strx (str c)]
-;;       (Type/getObjectType
-;;        (.replace (if (some #{\. \[} strx)
-;;                    strx
-;;                    (str "java.lang." strx))
-;;                  "." "/")))))
-
-;; (defn- generate-interface
-;;   [{:keys [name extends methods]}]
-;;   (when (some #(-> % first clojure.core/name (.contains "-")) methods)
-;;     (throw
-;;       (IllegalArgumentException. "Interface methods must not contain '-'")))
-;;   (let [iname (.replace (str name) "." "/")
-;;         cv (ClassWriter. ClassWriter/COMPUTE_MAXS)]
-;;     (. cv visit Opcodes/V1_5 (+ Opcodes/ACC_PUBLIC
-;;                                 Opcodes/ACC_ABSTRACT
-;;                                 Opcodes/ACC_INTERFACE)
-;;        iname nil "java/lang/Object"
-;;        (when (seq extends)
-;;          (into-array (map #(.getInternalName (asm-type %)) extends))))
-;;     (when (not= "NO_SOURCE_FILE" *source-path*) (. cv visitSource *source-path* nil))
-;;     (add-annotations cv (meta name))
-;;     (doseq [[mname pclasses rclass pmetas] methods]
-;;       (let [mv (. cv visitMethod (+ Opcodes/ACC_PUBLIC Opcodes/ACC_ABSTRACT)
-;;                   (str mname)
-;;                   (Type/getMethodDescriptor (asm-type rclass)
-;;                                             (if pclasses
-;;                                               (into-array Type (map asm-type pclasses))
-;;                                               (make-array Type 0)))
-;;                   nil nil)]
-;;         (add-annotations mv (meta mname))
-;;         (dotimes [i (count pmetas)]
-;;           (add-annotations mv (nth pmetas i) i))
-;;         (. mv visitEnd)))
-;;     (. cv visitEnd)
-;;     [iname (. cv toByteArray)]))
-
-;; (import '(clojure.lang DynamicClassLoader))
-
-;; (defmacro gen-interface
-;;   [& options]
-;;   (log/debug "gen-interface" options)
-;;     (let [options-map (apply hash-map options)
-;;           [cname bytecode] (generate-interface options-map)]
-;;       (log/debug "cname" cname)
-;;       (log/debug "bytecode" bytecode)
-;;       (when *compile-files*
-;;         (clojure.lang.Compiler/writeClassFile cname bytecode))
-;;       (let [dc (.defineClass ^DynamicClassLoader (deref clojure.lang.Compiler/LOADER)
-;;                     (str (:name options-map)) bytecode options)]
-;; (log/debug "dc" dc (type dc))
-;;         dc)))
-
-;; (defn- assert-same-protocol [protocol-var method-syms]
-;;   (doseq [m method-syms]
-;;     (let [v (resolve m)
-;;           p (:protocol (meta v))]
-;;       (when (and v (bound? v) (not= protocol-var p))
-;;         (binding [*out* *err*]
-;;           (println "Warning: protocol" protocol-var "is overwriting"
-;;                    (if p
-;;                      (str "method " (.sym v) " of protocol " (.sym p))
-;;                      (str "function " (.sym v)))))))))
-
 (defn- emit-method-builder [on-interface method on-method arglists]
   (let [methodk (keyword method)
         gthis (with-meta (gensym) {:tag 'clojure.lang.AFunction})
         ginterf (gensym)]
-    (log/debug "on-interface" on-interface)
-    (log/debug "on-method" on-method)
     `(fn [cache#]
        (let [~ginterf
              (fn
@@ -199,14 +39,13 @@
          (set! (.__methodImplCache f#) cache#)
          f#))))
 
-(defn- parse-sigparts
-  [s]
-  ;; (log/debug "parsing: " (type s) s )
-  (loop [opts {} [k v & rs :as s] s]
-    (if (keyword? k)
-      (recur (assoc opts k v) rs)
-      [opts s])))
-
+;; (defn- parse-sigparts
+;;   [s]
+;;   ;; (log/debug "parsing: " (type s) s )
+;;   (loop [opts {} [k v & rs :as s] s]
+;;     (if (keyword? k)
+;;       (recur (assoc opts k v) rs)
+;;       [opts s])))
 
 ;; TODO:  support :import, to incorporate other signatures
 ;;  e.g. for Monoid, :import Magma; for Group, :import Monoid, etc.
@@ -234,44 +73,70 @@
                 (recur f (f val (first s)) (next s)))
          val))))
 
+(defn xreset-methods [protocol]
+  (log/debug "-reset-methods" protocol)
+  (doseq [[^clojure.lang.Var v build] (:method-builders protocol)]
+    (log/debug "var" v)
+    (log/debug "build" build)
+    (let [cache (clojure.lang.MethodImplCache. protocol (keyword (.sym v)))]
+      (.bindRoot v (build cache)))))
+
 (defn- emit-signature [signame opts+sigs]
-  (log/debug "opts+sigs" opts+sigs)
+  ;; (log/debug "opts+sigs" opts+sigs)
+  ;; FIXME: validate opts, required and optional
+
   (let [[opts sigs] (if (string? (first opts+sigs))
                       [{:doc (first opts+sigs)} (next opts+sigs)]
                       [{} opts+sigs])
-        ;; log (log/debug "OPTS" opts)
-        ;; log (log/debug "SIGS" sigs)
-        [opts sigs reducts] (if-let [reducts (if (= (first sigs) :expand) (second sigs) nil)]
-                             [opts (next (next sigs)) reducts]
-                             [opts sigs nil])
-        ;; log (log/debug "opts" opts)
-        ;; log (log/debug "sigs" sigs)
-        log (log/debug "reducts" reducts)
-
-        [opts sigs]
-        (loop [opts {} sigs sigs]
+        ;; [opts sigs reducts] (if-let [reducts (if (= (first sigs) :expand) (second sigs) nil)]
+        ;;                      [opts (nnext sigs) reducts]
+        ;;                      [opts sigs nil])
+        [opts sigs reducts ns universe constants operators laws]
+        (loop [opts {}, sigs sigs,
+               reducts nil, ns nil, universe nil, constants nil, operators nil, laws nil]
           (condp #(%1 %2) (first sigs)
             ;; string? (recur (assoc opts :doc (first sigs)) (next sigs))
-            keyword? (recur (assoc opts (first sigs) (second sigs)) (nnext sigs))
-            (do #_(log/debug "last sigs:" sigs)
-                #_(log/debug "last opts:" opts)
-            [opts sigs])))
-        model-ns (:ns opts)
-
+            #(= % :expand) (recur opts (nnext sigs)
+                                  (second sigs) ns universe constants operators laws)
+            #(= % :ns) (recur opts (nnext sigs)
+                              reducts (second sigs) universe constants operators laws)
+            #(= % :universe) (recur opts (nnext sigs)
+                                    reducts ns (second sigs) constants operators laws)
+            #(= % :constants) (recur opts (nnext sigs)
+                                     reducts ns universe (second sigs) operators laws)
+            #(= % :operators) (recur opts (nnext sigs)
+                                     reducts ns universe constants (second sigs) laws)
+            #(= % :laws) (recur opts (nnext sigs)
+                                reducts ns universe constants operators (second sigs))
+            keyword? (recur (assoc opts (first sigs) (second sigs)) (nnext sigs)
+                            reducts ns universe constants operators laws)
+            (do (log/debug "last sigs:" sigs)
+                (log/debug "last opts:" opts)
+                [opts sigs reducts ns universe constants operators laws])))
+                ;; [opts sigs ns universe])))
+;; log          (log/debug "opts" opts)
+;; log          (log/debug "sigs" sigs)
+log          (log/debug "reducts" reducts)
+log          (log/debug "ns" ns)
+;; log          (log/debug "universe" universe)
+;; log          (log/debug "operators" operators)
+;; log          (log/debug "constants" constants)
+        model-ns ns ; (:ns opts)
+        opts (dissoc opts :ns)
         iname (symbol (str (munge (namespace-munge model-ns)) "." (munge signame)))
         opts (into opts {:on (list 'quote iname) :on-interface iname})
 
-        universe (:universe opts)
+        log (log/debug "opts" opts)
+        log (log/debug "sigs" sigs)
+        log (log/debug "reducts" reducts)
+
+        ;; universe (:universe opts)
         ;; ops (:operators opts)
-        laws (:law opts)
+        ;; laws (:laws opts)
         usym (:sym universe)
         urestriction (:restriction universe)
-        constants (into #{}
-                        (concat (:constants (first sigs))
-                                (when reducts (:constants (eval (first reducts))))))
-log (log/debug "OUT2" (:constants (eval (first reducts))))
-
-        sigs (:operators (first sigs))
+        ;; constants (:constants (first sigs))
+        sigs operators
         sigs (do #_(log/debug "sigs" sigs)
                  (when sigs
                (reduce1 (fn [m s]
@@ -298,11 +163,23 @@ log (log/debug "OUT2" (:constants (eval (first reducts))))
                           (map #(vector m (vec (repeat (dec (count %))'Object)) 'Object)
                                (:arglists sig))))
                       (vals sigs))
-        ;; log (log/debug "meths" meths)
+        log (log/debug "meths" meths)
         svar (gensym)
+        reducts-map (when reducts @(find-var (first reducts)))
+        log (log/debug "reducts-map" reducts-map)
+        constants (into #{} (concat constants
+                                    (when reducts (:constants reducts-map))))
+        log (log/debug "CONSTANTS" constants)
+        sigs (into sigs (when reducts  (:sigs reducts-map)))
+        ;; log (log/debug "SIGS" sigs)
+        laws (into laws (when reducts (:laws reducts-map)))
+        ;; log (log/debug "LAWS" laws)
+        sname (str model-ns "/" signame)
+        log (log/debug "sname" sname)
         ]
   `(do
-     ;; (log/debug "~out:" '~meths)
+;     (log/debug (str "ns sname: '" (namespace '~sname) "'"))
+;     (log/debug (str "nm sname:" (name '~sname)))
      (let [ns# (create-ns '~model-ns)
            ~svar (intern ns# '~signame {})
            U# (if (nil? ~universe) (symbol #_(str ns#) "U") ~universe)]
@@ -312,10 +189,12 @@ log (log/debug "OUT2" (:constants (eval (first reducts))))
        ;;    `(#'assert-same-protocol ~svar #_(var ~signame) '~(map :name (vals sigs))))
        (alter-var-root ~svar merge
                      (assoc '~opts
+                            :universe '~universe
                             :constants '~constants
                        :sigs '~sigs
                        :var ~svar
-                       :reducts ~reducts
+                       ;; :reducts ~reducts
+                       :laws '~laws
                        :method-map ~(and #_(:on opts)
                                             (apply hash-map
                                                    (mapcat
@@ -335,80 +214,12 @@ log (log/debug "OUT2" (:constants (eval (first reducts))))
                                                                             (:arglists s))])
                                                     (vals sigs)))
                         ))
-     (-reset-methods ~svar) ;; ~signame)
-     ~svar))))
-
-
-    ;; (log/debug "model-ns" '~model-ns))))
+       (-reset-methods @~svar) ;; ~signame)
+       ~svar))))
 
 (defmacro declare-signature!
   [name & opts+sigs]
   (emit-signature name opts+sigs))
-
-;; (defmacro signature!
-;;   [signame & args]
-;;   (let [{model-ns :ns
-;;          universe :universe
-;;          constants :constants
-;;          ops :operators
-;;          laws :laws} (first (parse-sigparts args))
-;;         usym (:sym universe)
-;;         urestriction (:restriction universe)
-;; log (log/debug "u:" universe)
-;;         sigs nil
-;;         meths nil
-;;         opts nil
-;;         ]
-;;     `(do
-;;        (let [ns# (create-ns '~model-ns)
-;;              svar# (intern ns# '~signame {})
-;;              U# (if (nil? ~universe) (symbol #_(str ns#) "U") ~universe)]
-;;          (log/debug "urestriction: " '~urestriction)
-;;          ;;     (gen-interface :name ~iname :methods ~meths)
-;;          ;;     (alter-meta! (var ~signame) assoc :doc ~(:doc opts))
-;;          ;; ~(when sigs
-;;          ;;    `(#'assert-same-protocol (var ~signame) '~(map :name (vals sigs))))
-;;          (alter-var-root svar# merge ;; (var ~signame) merge
-;;                          (assoc ~opts
-;;                                 :sigs '~sigs
-;;                                 :var svar# ;; (var ~signame)
-;;                                 :universe {:sym ~usym :restriction '~urestriction}
-;;                                 :consts ~constants
-;;                                 :method-map
-;;                                 ~(and (:on opts)
-;;                                       (apply hash-map
-;;                                              (mapcat
-;;                                               (fn [s]
-;;                                                 [(keyword (:name s)) (keyword (or (:on s) (:name s)))])
-;;                                               (vals sigs))))
-;;                                 :method-builders
-;;                                 ~(apply hash-map
-;;                                         (mapcat
-;;                                          (fn [s]
-;;                                            [`(intern *ns* (with-meta '~(:name s)
-;;                                                             (merge '~s {:protocol svar# #_(var ~signame)})))
-;;                                             (emit-method-builder (:on-interface opts) (:name s) (:on s) (:arglists s))])
-;;                                          (vals sigs)))))
-;;          (-reset-methods svar#) ; ~signame)
-;;          svar#))))
-
-;;       ns-part (namespace-munge *ns*)
-;;       classname (symbol (str ns-part "." gname))
-;;       hinted-fields fields
-;;       fields (vec (map #(with-meta % nil) fields))
-;;       [field-args over] (split-at 20 fields)]
-;;   `(let []
-;;      ~(emit-deftype* name gname (vec hinted-fields) (vec interfaces) methods opts)
-;;      (import ~classname)
-;;      ~(build-positional-factory gname classname fields)
-;;      ~classname)))
-
-
-;; core_deftype.clj
-;; (defn -reset-methods [protocol]
-;;   (doseq [[^clojure.lang.Var v build] (:method-builders protocol)]
-;;     (let [cache (clojure.lang.MethodImplCache. protocol (keyword (.sym v)))]
-;;       (.bindRoot v (build cache)))))
 
 ;; TODO: rules.  Only one sig per model; only one underlying type?
 
@@ -430,56 +241,208 @@ log (log/debug "OUT2" (:constants (eval (first reducts))))
 ;; to T.  Then we can use symbol 'T' to express e.g. law of closure:
 ;; a*b \in T.
 
-;; (model-signature S
-;;   :name M
-;;   :ns foo.bar
+;; (define-model! M :for S
 ;;   :dom java.lang.Long ; map semantic type to implementation type
 ;;   :constants {:a 0 :b 1}
 ;;   :operators {:f1 foo/f1              ; op semantics
 ;;               :f2 bar/f2})
 
-(defmacro model-signature!
-  [sig & args]
-  (let [{model-name :name
-         model-ns :ns
-         constants :constants
-         ops :operators} (first (parse-sigparts args))
-        sigs nil
-        meths nil
-        opts nil
-        ;; mvar nil
+
+(defn- validate-model-constants
+  [mc sc] ; model consts (map), and signature consts (set)
+  (log/debug "mc" mc)
+  (log/debug "sc" sc)
+  (if (= (set (keys mc)) sc)
+    mc
+    (throw (RuntimeException. (str "Model constant defs " mc " do not match sig consts:" sc)))))
+
+(defn- emit-model [signame opts+sigs]
+  (let [[opts sigs] (if (string? (first opts+sigs))
+                      [{:doc (first opts+sigs)} (next opts+sigs)]
+                      [{} opts+sigs])
+        [opts sigs ns universe constants operators forsig]
+        (loop [opts {}, sigs sigs,
+               ns nil, universe nil, constants nil, operators nil, forsig nil]
+
+         ;; (log/debug "opts" opts)
+         ;; (log/debug "sigs" sigs)
+         ;; (log/debug "forsig" forsig)
+         ;; (log/debug "ns" ns)
+         ;; (log/debug "universe" universe)
+         ;; (log/debug "operators" operators)
+         ;; (log/debug "constants" constants)
+
+          (condp #(%1 %2) (first sigs)
+            string? (recur (assoc opts :doc (first sigs)) (next sigs)
+                           ns universe constants operators forsig)
+            ;; #(= % :expand) (recur opts (nnext sigs)
+            ;;                       (second sigs) ns universe constants operators forsig)
+            #(= % :ns) (recur opts (nnext sigs)
+                              (second sigs) universe constants operators forsig)
+            #(= % :universe) (recur opts (nnext sigs)
+                                    ns (second sigs) constants operators forsig)
+            #(= % :constants) (recur opts (nnext sigs)
+                                     ns universe (second sigs) operators forsig)
+            #(= % :operators) (recur opts (nnext sigs)
+                                     ns universe constants (second sigs) forsig)
+            #(= % :for) (recur opts (nnext sigs)
+                               ns universe constants operators (second sigs))
+            keyword? (recur (assoc opts (first sigs) (second sigs)) (nnext sigs)
+                            ns universe constants operators forsig)
+            (do (log/debug "mdl last sigs:" sigs)
+                (log/debug "mdl last opts:" opts)
+                [opts sigs ns universe constants operators forsig])))
+;; log          (log/debug "opts" opts)
+;; log          (log/debug "sigs" sigs)
+;; log          (log/debug "forsig" forsig)
+;; log          (log/debug "ns" ns)
+;; log          (log/debug "universe" universe)
+;; log          (log/debug "operators" operators)
+;; log          (log/debug "constants" constants)
+        ;; model-ns ns ; (:ns opts)
+        ;; opts (dissoc opts :ns)
+        ;; iname (symbol (str (munge (namespace-munge model-ns)) "." (munge signame)))
+        ;; opts (into opts {:on (list 'quote iname) :on-interface iname})
+
+        ;; log (log/debug "opts" opts)
+        ;; log (log/debug "sigs" sigs)
+
+        ;; universe (:universe opts)
+        ;; ops (:operators opts)
+        ;; forsig (:forsig opts)
+        usym (:sym universe)
+        urestriction (:restriction universe)
+        ;; constants (:constants (first sigs))
+        sigs operators
+        ;; sigs (do #_(log/debug "sigs" sigs)
+        ;;          (when sigs
+        ;;            (reduce1 (fn [m s]
+        ;;                       (let [name-meta (meta (first s))
+        ;;                             mname (with-meta (first s) nil)
+        ;;                             [arglists doc]
+        ;;                             (loop [as [] rs (rest s)]
+        ;;                               (if (vector? (first rs))
+        ;;                                 (recur (conj as (first rs)) (next rs))
+        ;;                                 [(seq as) (first rs)]))]
+        ;;                         (when (some #{0} (map count arglists))
+        ;;                           (throw (IllegalArgumentException. (str "Definition of function " mname " in protocol " signame " must take at least one arg."))))
+        ;;                         (when (m (keyword mname))
+        ;;                           (throw (IllegalArgumentException. (str "Function " mname " in protocol " signame " was redefined. Specify all arities in single definition."))))
+        ;;                         (assoc m (keyword mname)
+        ;;                                (merge name-meta
+        ;;                                       {:name (vary-meta mname assoc :doc doc :arglists arglists)
+        ;;                                        :arglists arglists
+        ;;                                        :doc doc}))))
+        ;;                     {} sigs)))
+        ;; meths (mapcat (fn [sig]
+        ;;                 #_(log/debug "methsig" sig)
+        ;;                 (let [m (munge (:name sig))]
+        ;;                   (map #(vector m (vec (repeat (dec (count %))'Object)) 'Object)
+        ;;                        (:arglists sig))))
+        ;;               (vals sigs))
+        ;; log (log/debug "meths" meths)
+        svar (gensym)
+        sigmap @(find-var forsig)
+        log (log/debug "sigmap" sigmap)
+        log (log/debug "CONSTANTS 1" constants)
+        constants (validate-model-constants constants (:constants sigmap))
+        log (log/debug "CONSTANTS 2" constants)
+        sigs (into sigs (when sigmap  (:sigs sigmap)))
+        ;; log (log/debug "SIGS" sigs)
+        ;; for (into forsig (when sigmap (:for sigmap)))
+        ;; log (log/debug "FOR" for)
+        laws (:laws sigmap)
+        log (log/debug "laws" laws)
         ]
-    `(do
-       ;; (log/debug (str "mvar name: " '~model-name))
-       (let [ns# (create-ns '~model-ns)
-             mvar# (intern ns# '~model-name {})]
-         (log/debug "mvar: " mvar# (type mvar#))
-         ;;     (gen-interface :name ~iname :methods ~meths)
-         ;;     (alter-meta! (var ~model-name) assoc :doc ~(:doc opts))
-         ;; ~(when sigs
-         ;;    `(#'assert-same-protocol (var ~model-name) '~(map :name (vals sigs))))
-         (alter-var-root mvar# merge ;; (var ~model-name) merge
-                         (assoc ~opts
-                                :sigs '~sigs
-                                :var mvar# ;; (var ~model-name)
-                                :consts ~constants
-                                :method-map
-                                ~(and (:on opts)
-                                      (apply hash-map
-                                             (mapcat
-                                              (fn [s]
-                                                [(keyword (:name s)) (keyword (or (:on s) (:name s)))])
-                                              (vals sigs))))
-                                :method-builders
-                                ~(apply hash-map
-                                        (mapcat
-                                         (fn [s]
-                                           [`(intern *ns* (with-meta '~(:name s)
-                                                            (merge '~s {:protocol mvar# #_(var ~model-name)})))
-                                            (emit-method-builder (:on-interface opts) (:name s) (:on s) (:arglists s))])
-                                         (vals sigs)))))
-         (-reset-methods mvar#) ; ~model-name)
-         mvar#))))
+  `(do
+     (let [ns# (create-ns (symbol (namespace '~signame)))
+           ~svar (intern ns# (symbol (name '~signame)) {})]
+           ;; U# (if (nil? ~universe) (symbol #_(str ns#) "U") ~universe)]
+
+       ;; (gen-interface :name ~iname :methods ~meths)
+       ;;     (alter-meta! ~svar #_(var ~signame) assoc :doc ~(:doc opts))
+       ;; ~(when sigs
+       ;;    `(#'assert-same-protocol ~svar #_(var ~signame) '~(map :name (vals sigs))))
+
+       (alter-var-root ~svar merge
+                     (assoc '~opts
+                            :universe '~universe
+                            :constants '~constants
+                            :operators ~operators
+                            :var ~svar
+                            ;; :sigmap ~sigmap
+                            :signature '~forsig
+                            :laws '~laws
+                            :method-map (:method-map '~sigmap)
+                       ;; :method-map ~(and #_(:on opts)
+                       ;;                      (apply hash-map
+                       ;;                             (mapcat
+                       ;;                              (fn [s]
+                       ;;                                [(keyword (:name s))
+                       ;;                                 (keyword (or (:on s) (:name s)))])
+                       ;;                              (vals sigs))))
+                            :method-builders '~sigs
+                       ;; :method-builders ~(apply hash-map
+                       ;;                             (mapcat
+                       ;;                              (fn [s]
+                       ;;                                [`(intern '~model-ns ;; *ns*
+                       ;;                                          (with-meta '~(:name s)
+                       ;;                                            (merge '~s {:protocol ~svar})))
+                       ;;                                 (emit-method-builder (:on-interface opts)
+                       ;;                                                      (:name s)
+                       ;;                                                      (:on s)
+                       ;;                                                      (:arglists s))])
+                       ;;                              (vals sigs)))
+                        ))
+       ;; (-reset-methods @~svar) ;; ~signame)
+       '~signame))))
+
+(defmacro define-model!
+  [name & opts]
+  (emit-model name opts))
+
+;; (defmacro define-model!
+;;   [sig & args]
+;;   (let [{model-name :name
+;;          model-ns :ns
+;;          constants :constants
+;;          ops :operators} (first (parse-sigparts args))
+;;         sigs nil
+;;         meths nil
+;;         opts nil
+;;         ;; mvar nil
+;;         ]
+;;     `(do
+;;        ;; (log/debug (str "mvar name: " '~model-name))
+;;        (let [ns# (create-ns '~model-ns)
+;;              mvar# (intern ns# '~model-name {})]
+;;          (log/debug "mvar: " mvar# (type mvar#))
+;;          ;;     (gen-interface :name ~iname :methods ~meths)
+;;          ;;     (alter-meta! (var ~model-name) assoc :doc ~(:doc opts))
+;;          ;; ~(when sigs
+;;          ;;    `(#'assert-same-protocol (var ~model-name) '~(map :name (vals sigs))))
+;;          (alter-var-root mvar# merge ;; (var ~model-name) merge
+;;                          (assoc ~opts
+;;                                 :sigs '~sigs
+;;                                 :var mvar# ;; (var ~model-name)
+;;                                 :consts ~constants
+;;                                 :method-map
+;;                                 ~(and (:on opts)
+;;                                       (apply hash-map
+;;                                              (mapcat
+;;                                               (fn [s]
+;;                                                 [(keyword (:name s)) (keyword (or (:on s) (:name s)))])
+;;                                               (vals sigs))))
+;;                                 :method-builders
+;;                                 ~(apply hash-map
+;;                                         (mapcat
+;;                                          (fn [s]
+;;                                            [`(intern *ns* (with-meta '~(:name s)
+;;                                                             (merge '~s {:protocol mvar# #_(var ~model-name)})))
+;;                                             (emit-method-builder (:on-interface opts) (:name s) (:on s) (:arglists s))])
+;;                                          (vals sigs)))))
+;;          (-reset-methods mvar#) ; ~model-name)
+;;          mvar#))))
 
 (defmacro with-model
   "install a model and execute body in that environment"

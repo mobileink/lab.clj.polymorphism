@@ -1,0 +1,66 @@
+= signatures
+
+== expansion and reduction
+
+No inheritance in algebra, only expansion and reduction.
+
+== universe
+
+Also known as underlying set, carrier set, (semantic) domain, etc.
+
+The problem: host env often does not directly support the needed
+datatypes.  So we need to make a distinction between the _semantic_
+carrier and the _implementation_ type that represents that carrier.
+
+For example, neither Clojure nor Java directly supports the natural
+numbers N.  So we can specify that the carrier of, say a monoid is N,
+in order to implement this we must choose an implementation type from
+those offered by the host, probably Long in this case.  And of course
+the term "Long" itself is purely implementational; it does not refer
+to a semantic category like Int or Nat.  In particular zero and the
+negative values are valid Longs, violating the definition of N.  So to
+support N we must add a _restriction_ to our implementation type; in
+this case, a predicate that returns true for any N value and false for
+any other.  In Clojure, `pos?` will work.
+
+Note that the restriction can and should be expressed as part of the
+signature rather than the implementation; it should be meaningfully
+translatable to any implementation choice.  Strictly speaking we might
+want to consider it part of the metadata of a signature.
+
+In a signature declaration, we only specify a symbol for the carrier
+set, plus any restrictions on its values.
+
+(Note that this makes the carrier a kind of dependent type; we can
+think of N0 and N1 as types depending on 0 and 1, respectively.  More
+generally, "integers >= n" for any n can be thought of as a family of
+dependent type.)
+
+problems:
+
+* expansion: if sig B expands sig A, how can we guarantee that the
+  Universe specified for B is conservative, that is, does not clash
+  with the one specified for A.  For example, suppose A's universe is
+  N1 (integers starting at 1), and B's is N0 (integers starting at 0).
+  Or A's is Strings of length < 10 and B's is Int.
+
+  The problem here is that we're not being general enough.  We really
+  cannot restrict the universe at the level of the signature - that
+  would exclude any models that don't use that universe.  All we can
+  really say is that the universe is a set of values, and we can only
+  express constraints as laws.
+
+  For example, we cannot say that a monoid's carrier starts at 1 -
+  that's for the model to say, not the signature.
+
+== symbol set
+
+What about symbol set variants?  We can express the same algebra at
+the signature level using different symbol sets.  Which just means
+that choice of symbols is arbitrary and does not affect semantics.
+
+To show that two algebras are just symbol variants we have to show
+that their symbol sets and their operation rules are isomorphic.  To
+support this, we can use an :iso key to allow one signature
+declaration to refer to another isomorphic one; then we just provide a
+mapping for the symbols, and we can reuse the models of the base one.
