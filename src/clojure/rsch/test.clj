@@ -41,7 +41,8 @@
                       :ns a.b
                       :universe {:sym 'G, :restriction pos?}
                       ;; :constants #{:f}
-                      :operators [(g1 [a] "group operation f1")]
+                      :operators [(inv [a] "inverse")]
+                      ;; FIXME 
                       :laws {:inverse #(= (* % (inv %)) e)})
 
 (pprint a.b/Group)
@@ -94,7 +95,8 @@
              :impl {:type java.lang.Long ; implementation type
                     :restriction #(> % -1)}}
   :constants {:e 0}
-  :operators {:* +, :mon1 identity, :g1 identity})
+  :operators {:* +, :mon1 identity,
+              :inv #(- %)})
 
 (pprint foo.bar/GrpN1*)
 
@@ -103,7 +105,7 @@
              :impl {:type java.lang.Long ; implementation type
                     :restriction pos?}}
   :constants {:e 1}
-  :operators {:* *, :mon1 identity, :g1 identity})
+  :operators {:* *, :mon1 identity, :inv (fn [a] (/ 1 a))})
 
 (pprint foo.bar/GrpN1*)
 
@@ -114,28 +116,52 @@
                     :restriction #(> % -1)}}
   :constants {:e 0}
   :operators {:* (fn [a b] (mod (+ a b) 3))
-              :mon1 identity, :g1 identity})
+              :mon1 identity,
+              :inv (fn [a] (- 3 (mod a 3)))})
 
 (pprint foo.bar/GrpMod3-N0+)
 
-(s/define-model! foo.bar/GrpMod3-N1* :for a.b/Group
-  :universe {:sym :Nat ;; would be a type if we had genuine types
-             :impl {:type java.lang.Long ; implementation type
-                    :restriction pos?}}
-  :constants {:e 1}
-  :operators {:* (fn [a b] (mod (* a b) 3))
-              :mon1 identity, :g1 identity})
-
-(pprint foo.bar/GrpMod3-N1*)
-
+;; group identity
  (s/with-model foo.bar/GrpN0+ ;; :for a.b/Group
+   e) ; => 0
+
+ (s/with-model foo.bar/GrpN1*
+   e) ; => 1
+
+ (s/with-model foo.bar/GrpMod3-N0+
+   e) ; => 0
+
+ (s/with-model foo.bar/GrpN0+
+   (* e 4)) ; => 4
+
+ (s/with-model foo.bar/GrpN1*
+   (* e 4)) ; => 4
+
+ (s/with-model foo.bar/GrpMod3-N0+
+   (* e 2)) ; => 2
+ (s/with-model foo.bar/GrpMod3-N0+
+   (* e 4)) ; => 1
+ (s/with-model foo.bar/GrpMod3-N0+
+   (* 0 4)) ; => 1
+
+;; group multiplication
+ (s/with-model foo.bar/GrpN0+ ;; op is addition
    (* 3 4)) ; => 7
 
- (s/with-model foo.bar/GrpN1* ;; :for a.b/Group
+ (s/with-model foo.bar/GrpN1* ;; :op is multiplication
    (* 3 4)) ; => 12
 
- (s/with-model foo.bar/GrpMod3-N0+ ;; :for a.b/Group
-   (* 3 4)) ; => 1
+ (s/with-model foo.bar/GrpMod3-N0+ ;; op is addition modulo 3
+   (* 2 5)) ; => 1
+ (s/with-model foo.bar/GrpMod3-N0+ ;; op is addition modulo 3
+   (* 1 2)) ; => 0
 
- (s/with-model foo.bar/GrpMod3-N1* ;; :for a.b/Group
-   (* 3 4)) ; => 0
+;; group inverse
+ (s/with-model foo.bar/GrpN0+
+   (inv 3)) ; => -3
+
+ (s/with-model foo.bar/GrpN1*
+   (inv 3)) ; => 1/3
+
+ (s/with-model foo.bar/GrpMod3-N0+
+   (inv 4)) ; => 2
