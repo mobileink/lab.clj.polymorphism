@@ -9,7 +9,7 @@ operations defined on it that satisfies a some list of axioms."
 (link:https://en.wikipedia.org/wiki/Algebraic_structure[Algebraic
 Structure]).
 
-There are a variety of was to express the idea of an algebra more
+There are a variety of ways to think about the idea of an algebra more
 formally.  For example, in
 link:https://en.wikipedia.org/wiki/Universal_algebra[Universal
 Algebra] an algebra (or algebraic structure) is "a set A together with
@@ -24,11 +24,12 @@ link:https://en.wikipedia.org/wiki/Signature_(logic)[signature]) of an
 algebra and its carrier set.
 
 The model-theoretic perspective is more finely articulated, in that it
-distinguishes between three distinct components of an algebra:
+distinguishes between distinct components of an algebra:
 
 * a _signature_, which is a set of symbols of different arities
 
-* a set of rules (axioms) governing the formal behavior of the symbols
+* a set of _axioms_ (rules) governing the formal behavior (but _not_
+  the meaning) of the symbols
 
 * a _structure_, which is an abstract mathematical collection of
   values and functions on those values
@@ -36,17 +37,110 @@ distinguishes between three distinct components of an algebra:
 * a _model_, which is a mapping from the signature to the structure
   under which the axioms come out as true
 
-Note that a signature is a purely formal _linguistic_ device, while
-therefore devoid of meaning, and a structure is a purely informal and
+Note that a signature is a purely formal _linguistic_ device, and
+therefore devoid of meaning, while a structure is a purely informal
 _extra-linguistic_ device, and therefore devoid of expressibility.
 Signatures only become meaningful, and structures expressible, _under
 a model_; that is, when we have agreed on a mapping from the one to
-the other.
+the other.  Models (more generally, interpretations) allow us to use
+formal symbols to refer to informal mathematical values.
 
-But even this is not quite satisfactory.  It's easy to imagine that
-different structures could satisfy the axioms of a particular algebra
+There is a subtlety here that is easy to miss: "'symbols' can be any
+mathematical objects, not necessarily written symbols."
+(link:https://books.google.com/books/about/A_Shorter_Model_Theory.html?id=S6QYeuo4p1EC[Hodges,
+_A Shorter Model Theory]) So we can take an abstract view on the
+notion of a signature, and this means that we can express the same
+algebraic structure using different concrete symbols.  For example, we
+could choose the standard numerals {0..9} for an algebra, or we could
+use an alphabetic symbol set {a,b,c,d,e,f,g,h,i,j} instead - in fact
+we could use any set of ten distinct symbols.  Structurally and
+semantically everything would come out the same; they would just look
+different.
 
-Some simple examples.
+This suggests a need to distinguish between abstract and concrete
+signatures, just as we distinguish between abstract and concrete
+structures (e.g. sequence v. sequence of integers).
+
+For example, we might specify an algebraic signature abstractly by
+saying it consists of three constant symbols and one binary operation
+symbol.  We might make this more concrete by specifying {0,1,2,+}, or
+{a,b,c,!}, or any other collection of four concrete symbols.
+
+=== an example: monoid
+
+A (the?) monoid abstract signature is a set of symbols.  One nullary
+symbol is designated as the identity symbol, and one binary symbol is
+designated as the multiplication symbol.  There are three axioms:
+
+* closure: any two symbols combined by the multiplication symbol form another symbol in the set
+
+* identity: any symbol multiplied by the identity symbol produces the original symbol
+
+* associativity: when multiplying three symbols, ....
+
+Trying to express associativity in abstract language, without using
+symbols, is a pain.  It's easier to settle on a few _meta-symbols_ and
+variable symbols that allow us to express axioms clearly and
+concisely.  It's critical to understand that these (necessarily
+concrete) symbols are not part of the abstract symbol set; their sole
+purpose is to state rules _about_ the abstract symbols and their
+combination:
+
+* variable symbols: a, b, c
+* identity symbol: e
+* binary function symbol: *
+* axiom of closure:  for all a, b in the symbol set, a*b is in the symbol set
+* axiom of identity: for all a in the symbol set, a*e = e*a = a
+* axiom of associativity:  for all a, b, c in the symbol set, a*(b*c) = (a*b)*c
+
+Again, it's critically important to see that these symbols are not
+part of the algebra's symbol set, abstract or concrete.  They're
+meta-symbols that we use to talk _about_ the abstract symbol set.
+
+Having defined the monoid algebra abstractly, we can declare a
+concrete signature for the algebra:
+
+* let the symbol set be the base set {0..9} together with the
+  syntactic rules for positional notation that make e.g. "27" a symbol
+  of the set, plus the symbol '+'.
+
+* let the identity element 'e' map to symbol '0'
+
+* let the binary function '*' map to symbol '+'
+
+That's it.  The abstract axioms will apply to this concrete symbol set
+without modification, since they are expressed abstractly and we have
+provided a concrete interpretation.
+
+This allows us to write expressions like 2*3 or 3*e, which translate
+to 2+3 and 3+0 respectively.
+
+That gives us syntax, but we still have no semantics.  The symbols and
+expressions remain purely formal.  To remedy this we need to define a
+model that maps the symbols to a semantic domain:
+
+* let the symbol set map to the natural numbers in the obvious way,
+  e.g. '0' => 0, '1' => 1, etc.
+
+* let '+' => + (arithmetic addition on Nat)
+
+And we're done.  Now expressions like 2*3 mean something: 2*3 = 5
+(remember we mapped '*' to '\+', and '+' to addition on Nat.)
+
+== implementation
+
+For our multi-model implementation, we make both abstract and concrete
+signatures first-class citizens, along with models and structures.  To
+specify an algebra we do this:
+
+* define an "algebra" - meaning, state the axioms and the distinguish
+  elements, assuming an abstract symbol set
+
+* declare a signature for the algebra - nominate a concrete symbol
+  set, and map the distinguished elements of the abstract signature to
+  concrete symbols (e.g. map "e", the abstract identity symbol, to
+  "0", an element of the concrete symbol set.
+
 
 == some algebras
 
@@ -96,4 +190,3 @@ addition.
 Ring where multiplication is also commutative - both + and * are abelian
 
 === link:https://en.wikipedia.org/wiki/Vector_space#Definition[Vector Space]
-
