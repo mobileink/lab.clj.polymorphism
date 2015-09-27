@@ -73,14 +73,6 @@
                 (recur f (f val (first s)) (next s)))
          val))))
 
-(defn xreset-methods [protocol]
-  (log/debug "-reset-methods" protocol)
-  (doseq [[^clojure.lang.Var v build] (:method-builders protocol)]
-    (log/debug "var" v)
-    (log/debug "build" build)
-    (let [cache (clojure.lang.MethodImplCache. protocol (keyword (.sym v)))]
-      (.bindRoot v (build cache)))))
-
 (defn- emit-signature [signame opts+sigs]
   ;; (log/debug "opts+sigs" opts+sigs)
   ;; FIXME: validate opts, required and optional
@@ -189,6 +181,7 @@ log          (log/debug "ns" ns)
        ;;    `(#'assert-same-protocol ~svar #_(var ~signame) '~(map :name (vals sigs))))
        (alter-var-root ~svar merge
                      (assoc '~opts
+                            :ns '~model-ns
                             :universe '~universe
                             :constants '~constants
                        :sigs '~sigs
@@ -250,11 +243,25 @@ log          (log/debug "ns" ns)
 
 (defn- validate-model-constants
   [mc sc] ; model consts (map), and signature consts (set)
-  (log/debug "mc" mc)
-  (log/debug "sc" sc)
+  ;; (log/debug "mc" mc)
+  ;; (log/debug "sc" sc)
   (if (= (set (keys mc)) sc)
     mc
     (throw (RuntimeException. (str "Model constant defs " mc " do not match sig consts:" sc)))))
+
+(defn- validate-ops
+  [ops sigs meth-map meth-bldrs]
+  (log/debug "validate-ops")
+  (let [bld-keys (doall (map (comp :name meta) (keys meth-bldrs)))]
+    (log/debug "bld-keys" bld-keys)
+    (log/debug "meth-map" (keys meth-map))
+    (log/debug "sigs" sigs)
+    (log/debug "ops" ops)
+    (if (= (keys ops) (keys meth-map))
+      ;; FIXME: check arities
+      (log/debug "OK" )
+      (throw (RuntimeException. (str "Model op defs" ops " do not match sig decls: " meth-map))))
+    ))
 
 (defn- emit-model [signame opts+sigs]
   (let [[opts sigs] (if (string? (first opts+sigs))
@@ -313,7 +320,7 @@ log          (log/debug "ns" ns)
         usym (:sym universe)
         urestriction (:restriction universe)
         ;; constants (:constants (first sigs))
-        sigs operators
+        ;; sigs operators
         ;; sigs (do #_(log/debug "sigs" sigs)
         ;;          (when sigs
         ;;            (reduce1 (fn [m s]
@@ -344,11 +351,16 @@ log          (log/debug "ns" ns)
         svar (gensym)
         sigmap @(find-var forsig)
         log (log/debug "sigmap" sigmap)
-        log (log/debug "CONSTANTS 1" constants)
+
         constants (validate-model-constants constants (:constants sigmap))
-        log (log/debug "CONSTANTS 2" constants)
-        sigs (into sigs (when sigmap  (:sigs sigmap)))
-        ;; log (log/debug "SIGS" sigs)
+        log (log/debug "constants" constants)
+
+        sigs (:sigs sigmap)
+        meth-map  (:method-map sigmap)
+        meth-bldrs (:method-builders sigmap)
+
+        ops (validate-ops operators sigs meth-map meth-bldrs)
+
         ;; for (into forsig (when sigmap (:for sigmap)))
         ;; log (log/debug "FOR" for)
         laws (:laws sigmap)
@@ -373,7 +385,7 @@ log          (log/debug "ns" ns)
                             ;; :sigmap ~sigmap
                             :signature '~forsig
                             :laws '~laws
-                            :method-map (:method-map '~sigmap)
+                            :method-map '~meth-map
                        ;; :method-map ~(and #_(:on opts)
                        ;;                      (apply hash-map
                        ;;                             (mapcat
@@ -381,7 +393,7 @@ log          (log/debug "ns" ns)
                        ;;                                [(keyword (:name s))
                        ;;                                 (keyword (or (:on s) (:name s)))])
                        ;;                              (vals sigs))))
-                            :method-builders '~sigs
+                            :method-builders '~meth-bldrs
                        ;; :method-builders ~(apply hash-map
                        ;;                             (mapcat
                        ;;                              (fn [s]
@@ -449,20 +461,28 @@ log          (log/debug "ns" ns)
   ;; find the model (find-ns?), pull the constants and ops, and `let`
   ;; them, establishing the local environment and shadowing any
   ;; enclosing env.  then execute body.
-  [sig & body]
-  (log/debug "sig" sig (type sig))
-  ;; FIXME: sig must by strongly typed?
-  (let [sig-ns (find-ns (symbol (namespace sig)))
-        consts (:consts (eval sig)) ;; FIXME: do this within body?
+  [model & body]
+  (log/debug "model" model (type model))
+  ;; FIXME: model must by strongly typed?
+  (log/debug "model val" @(find-var model))
+  (let [model-ns (find-ns (symbol (namespace model)))
+        mdl @(find-var model)
+        consts (:constants mdl) ;; FIXME: do this within body?
         log (log/debug "consts" consts)
         bindv (into [] (flatten (for [[k v] consts] [(symbol (name k)) v])))
-        args (seq bindv)]
-    (log/debug "sig:" sig (type sig))
-    (log/debug "sig-ns:" sig-ns)
-    (log/debug "binv" bindv)
+        args (seq bindv)
+        ops (:operators mdl)
+        bindops (into bindv
+                      (flatten
+                       (for [[k v] ops]
+                        [(symbol (name k)) v])))]
+    (log/debug "model:" model (type model))
+    (log/debug "model-ns:" model-ns)
+    (log/debug "ops" ops)
+    (log/debug "bindv" bindv)
+    (log/debug "bindops" bindops)
     (log/debug "args" args)
-    `(println [~@bindv])
-    `(let [~@bindv]
+    `(let [~@bindops]
        ~(first body)
        )
     ))

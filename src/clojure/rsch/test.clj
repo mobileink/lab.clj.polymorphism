@@ -29,8 +29,7 @@
                       :ns a.b
                       :universe {:sym 'U, :restriction (fn [a] (> a 3))}
                       :constants #{:e}
-                      :operators [(mon1 [a] "monoid operation f1")
-                                  (mon2 [a b] "monoid operation f2")]
+                      :operators [(mon1 [a] "monoid operation f1")]
                       :laws {:idenity #(= (mon1 % e) %)})
 
 (pprint a.b/Monoid)
@@ -42,8 +41,7 @@
                       :ns a.b
                       :universe {:sym 'G, :restriction pos?}
                       ;; :constants #{:f}
-                      :operators [(g1 [a] "group operation f1")
-                                  (g2 [a b] "group operation f2")]
+                      :operators [(g1 [a] "group operation f1")]
                       :laws {:inverse #(= (* % (inv %)) e)})
 
 (pprint a.b/Group)
@@ -65,105 +63,79 @@
 ;;  :constants #{:foo}}
 
 ;; with-model? by-model? using-model?
-(s/define-model! foo.bar/MonN0 :for a.b/Monoid
+(s/define-model! foo.bar/MagN0+ :for a.b/Magma
   :universe {:sym :Nat ;; would be a type if we had genuine types
              :impl {:type java.lang.Long ; implementation type
                     :restriction #(> % -1)}}
-  :constants {:e 0 :foo 9}
-  :operators {:* '+})
+  :operators {:* +})
 
-(pprint foo.bar/MonN0)
 (pprint foo.bar/MagN0)
+
+(s/define-model! foo.bar/MonN0+ :for a.b/Monoid
+  :universe {:sym :Nat ;; would be a type if we had genuine types
+             :impl {:type java.lang.Long ; implementation type
+                    :restriction #(> % -1)}}
+  :constants {:e 0}
+  :operators {:* +, :mon1 /})
+
+(pprint foo.bar/MonN0+)
+
+(s/define-model! foo.bar/MonN1* :for a.b/Monoid
+  :universe {:sym :Nat ;; would be a type if we had genuine types
+             :impl {:type java.lang.Long ; implementation type
+                    :restriction pos?}}
+  :constants {:e 1}
+  :operators {:* *, :mon1 /})
+
+(pprint foo.bar/MonN1*)
 
 (s/define-model! foo.bar/GrpN0+ :for a.b/Group
   :universe {:sym :Nat ;; would be a type if we had genuine types
              :impl {:type java.lang.Long ; implementation type
                     :restriction #(> % -1)}}
   :constants {:e 0}
-  :operators {:* +})
+  :operators {:* +, :mon1 identity, :g1 identity})
 
-(pprint foo.bar/GrpN0+)
+(pprint foo.bar/GrpN1*)
 
-(s/define-model! foo.bar/GrpN0* :for a.b/Group
+(s/define-model! foo.bar/GrpN1* :for a.b/Group
   :universe {:sym :Nat ;; would be a type if we had genuine types
              :impl {:type java.lang.Long ; implementation type
-                    :restriction #(> % -1)}}
+                    :restriction pos?}}
   :constants {:e 1}
-  :operators {:* *})
+  :operators {:* *, :mon1 identity, :g1 identity})
 
-(pprint foo.bar/GrpN0*)
+(pprint foo.bar/GrpN1*)
 
 ;; FIXME:  is the modulus a const of the sig? or part of the operation semantics
-(s/define-model! foo.bar/GrpMod3 :for a.b/Group
+(s/define-model! foo.bar/GrpMod3-N0+ :for a.b/Group
   :universe {:sym :Nat ;; would be a type if we had genuine types
              :impl {:type java.lang.Long ; implementation type
                     :restriction #(> % -1)}}
   :constants {:e 0}
-  :operators {:* (fn [a b] (mod (+ a b) 3))})
+  :operators {:* (fn [a b] (mod (+ a b) 3))
+              :mon1 identity, :g1 identity})
 
-(pprint foo.bar/GrpMod3)
+(pprint foo.bar/GrpMod3-N0+)
 
-(let [* (:* (:operators foo.bar/GrpMod3))
-      e 0]
-  (pprint (* 3 e)))
+(s/define-model! foo.bar/GrpMod3-N1* :for a.b/Group
+  :universe {:sym :Nat ;; would be a type if we had genuine types
+             :impl {:type java.lang.Long ; implementation type
+                    :restriction pos?}}
+  :constants {:e 1}
+  :operators {:* (fn [a b] (mod (* a b) 3))
+              :mon1 identity, :g1 identity})
 
-(pprint a.b.N0)
+(pprint foo.bar/GrpMod3-N1*)
 
-(import 'a.b.Magma)
+ (s/with-model foo.bar/GrpN0+ ;; :for a.b/Group
+   (* 3 4)) ; => 7
 
-(type a.b.Magma)
+ (s/with-model foo.bar/GrpN1* ;; :for a.b/Group
+   (* 3 4)) ; => 12
 
-;;(refresh)
+ (s/with-model foo.bar/GrpMod3-N0+ ;; :for a.b/Group
+   (* 3 4)) ; => 1
 
-(pprint (reflect a.b.Magma))
-
-(meta #'a.b/g1)
-
-(:method-builders a.b/Magma)
-(:method-map a.b/Magma)
-(:sigs a.b/Magma)
-
-(var a.b/f1)
-
-(type (:ns a.b/Magma))
-
-(pprint a.b/Monoid)
-
-(:reduct a.b/Monoid)
-(:method-map a.b/Monoid)
-
-;; (s/model-signature Magma
-;;   :name MagN1
-;;   :ns foo.bar
-;;   :universe {:sym :Nat ;; would be a type if we had genuine types
-;;              :impl {:type java.lang.Long ; implementation type
-;;                     :restriction pos?}}
-;;   :constants {:e 1}
-;;   :operators {:* '*})
-
-
-
-(defprotocol P
-  "protocol docstring"
-  :foo "this is an option"
-    (foo [this]  "foo docstring")
-    (bar-me [this] [this y]))
-
-P
-(:method-builders (var P))
-
-(pprint (reflect rsch.test.P))
-
-(:sigs P)
-
-;; (s/model-signature 'S
-;;                    :name M
-;;                    :ns foo.bar
-;;                    :dom {:impl-type java.lang.Long
-;;                          :rule pos?} ;; should this be a law on sig? it expresses a semantic property
-;;                    :constants {:e 0 :x 9}
-;;                    :operators {:f1 impl/foo :f2 #(fbar %)})
-
-
-;;  (s/with-model foo.bar/M
-;;    (* 3 4))
+ (s/with-model foo.bar/GrpMod3-N1* ;; :for a.b/Group
+   (* 3 4)) ; => 0
