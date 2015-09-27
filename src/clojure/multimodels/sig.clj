@@ -1,4 +1,4 @@
-(ns rsch.sig
+(ns multimodels.sig
   (:require [clojure.tools.logging :as log :only [debug info]]))
 
   (import '(java.lang.reflect Modifier Constructor)

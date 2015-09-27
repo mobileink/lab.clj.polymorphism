@@ -1,5 +1,5 @@
-(ns rsch.test
-  (:require [rsch.sig :as s]
+(ns multimodels.test
+  (:require [multimodels.sig :as s]
             [clojure.repl :refer :all]
             [clojure.reflect :refer :all]
             [clojure.pprint :refer :all]
@@ -13,9 +13,7 @@
                       :opt1 "magma option 1"
                       :opt2 "magma option 2"
                       :ns a.b
-                      ;; universe restriction allows us to express dependent types; e.g. type of Nat > n
-                      :universe {:sym 'T, :restriction (fn [a] (> a 3))}
-                      ;; :constants #{:foo}
+                      ;; :constants #{} ;; no constants in a magma
                       :operators [(* [a b] "magma binop")]
                       :laws {:closure f}) ;; expresses: for all fns f and vals x, (f x...) in U
 
@@ -27,7 +25,6 @@
                       :opt1 "monoid option 1"
                       :opt2 "monoid option 2"
                       :ns a.b
-                      :universe {:sym 'U, :restriction (fn [a] (> a 3))}
                       :constants #{:e}
                       ;; :operators [(mon1 [a] "monoid operation f1")]
                       :laws {:idenity #(= (mon1 % e) %)})
@@ -39,38 +36,23 @@
                       :expand [a.b/Monoid]
                       :opt1 "group option 1"
                       :ns a.b
-                      :universe {:sym 'G, :restriction pos?}
-                      ;; :constants #{:f}
+                      ;; :constants #{}
                       :operators [(inv [a] "inverse")]
-                      ;; FIXME 
+                      ;; FIXME
                       :laws {:inverse #(= (* % (inv %)) e)})
 
 (pprint a.b/Group)
 (pprint a.b/Monoid)
 (pprint a.b/Magma)
 
-;; {:method-map {:* :*},
-;;  :opt2 "magma option 2",
-;;  :opt1 "magma option 1",
-;;  :on-interface a.b.Magma,
-;;  :var #'a.b/Magma,
-;;  :laws {:closure f},
-;;  :on 'a.b.Magma,
-;;  :method-builders
-;;  {#'a.b/*
-;;   #object[rsch.test$eval11308$fn__11313 0x2f60b3bb "rsch.test$eval11308$fn__11313@2f60b3bb"]},
-;;  :universe {:sym 'T, :restriction (fn [a] (> a 3))},
-;;  :sigs {:* {:name *, :arglists ([a b]), :doc "magma binop"}},
-;;  :constants #{:foo}}
-
-;; with-model? by-model? using-model?
 (s/define-model! foo.bar/MagN0+ :for a.b/Magma
+  ;; universe restriction allows us to express dependent types; e.g. type of Nat > n
   :universe {:sym :Nat ;; would be a type if we had genuine types
              :impl {:type java.lang.Long ; implementation type
                     :restriction #(> % -1)}}
   :operators {:* +})
 
-(pprint foo.bar/MagN0)
+(pprint foo.bar/MagN0+)
 
 (s/define-model! foo.bar/MonN0+ :for a.b/Monoid
   :universe {:sym :Nat ;; would be a type if we had genuine types
@@ -80,6 +62,15 @@
   :operators {:* +})
 
 (pprint foo.bar/MonN0+)
+
+(s/define-model! foo.bar/MonABC :for a.b/Monoid
+  :universe {:sym :Nat
+             :impl {:type java.lang.String}} ; implementation type
+                    ;; :restriction lowerCase}}
+  :constants {:e ""}
+  :operators {:* 'str})
+
+(pprint foo.bar/MonABC)
 
 (s/define-model! foo.bar/MonN1* :for a.b/Monoid
   :universe {:sym :Nat ;; would be a type if we had genuine types
@@ -97,7 +88,7 @@
   :constants {:e 0}
   :operators {:* +, :inv #(- %)})
 
-(pprint foo.bar/GrpN1*)
+(pprint foo.bar/GrpN0+)
 
 (s/define-model! foo.bar/GrpN1* :for a.b/Group
   :universe {:sym :Nat ;; would be a type if we had genuine types
@@ -126,6 +117,9 @@
  (s/with-model foo.bar/GrpN1*
    e) ; => 1
 
+ (s/with-model foo.bar/MonABC ;; :for a.b/Monoid
+   e) ; => ""
+
  (s/with-model foo.bar/GrpMod3-N0+
    e) ; => 0
 
@@ -135,12 +129,19 @@
  (s/with-model foo.bar/GrpN1*
    (* e 4)) ; => 4
 
+ (s/with-model foo.bar/MonABC
+   (* e "ab")) ; => "ab"
+
  (s/with-model foo.bar/GrpMod3-N0+
    (* e 2)) ; => 2
  (s/with-model foo.bar/GrpMod3-N0+
    (* e 4)) ; => 1
  (s/with-model foo.bar/GrpMod3-N0+
    (* 0 4)) ; => 1
+
+;; monoid multiplication
+ (s/with-model foo.bar/MonABC ;; op is string concatenation
+   (* "ab" "cd")) ; => "abcd"
 
 ;; group multiplication
  (s/with-model foo.bar/GrpN0+ ;; op is addition
