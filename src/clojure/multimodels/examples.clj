@@ -21,15 +21,18 @@
 
 (s/declare-signature! Monoid
                       "I am the Monoid docstring"
-                      :expand [a.b/Magma]
-                      :opt1 "monoid option 1"
-                      :opt2 "monoid option 2"
                       :ns a.b
+                      :expand [a.b/Magma]
                       :constants #{:e}
-                      ;; :operators [(mon1 [a] "monoid operation f1")]
-                      :laws {:idenity #(= (mon1 % e) %)})
+                      :laws {:idenity #(= (* % e) %)
+                             :associativity (fn [a b c] (= (* a (* b c)) (* (* a b) c))) })
 
 (pprint a.b/Monoid)
+
+;; (s/declare-signature! MonoidN0+ :for a.b/Monoid
+;;                       :symbol-set :N1
+;;                       :constants {:e 0}
+;;                       :operators {:* *})
 
 (s/declare-signature! Group
                       "I am the Group docstring"

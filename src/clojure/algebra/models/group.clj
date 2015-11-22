@@ -1,6 +1,6 @@
 (ns algebra.models.group
   (:refer-clojure :exclude [count])
-  (:require [algebra.signature.meta :as m]
+  (:require [algebra.signature.meta :as ameta]
             [algebra.signature.group :as g]
             ;; [algebra.signature.group.n0 :as g0]
             ;; [algebra.signature.group.n1 :as g1]
@@ -19,7 +19,7 @@
 
 ;; default model
 (extend java.lang.Object
-  m/AlgebraMeta {:name default/algebra-name
+  ameta/AlgebraMeta {:name default/algebra-name
                  :structure default/structure
                  ;; :install! default/install!
                  ;; :activate! default/activate!
@@ -29,7 +29,7 @@
   g/Operators {:** default/mult})
 
 (extend types.group.N0+
-  m/AlgebraMeta {:name n0/algebra-name
+  ameta/AlgebraMeta {:name n0/algebra-name
                  :structure n0/structure
                  ;; :install! n0/install!
                  ;; :activate! n0/activate!
@@ -39,7 +39,7 @@
   g/Operators {:** n0/mult})
 
 ;; (extend types.group.Q1*
-;;   m/AlgebraMeta {:name n1/algebra-name
+;;   ameta/AlgebraMeta {:name n1/algebra-name
 ;;                  :structure n1/structure
 ;;                  :install! n1/install!
 ;;                  :activate! n1/activate!
@@ -49,7 +49,7 @@
 ;;   g/Operators {:** n1/mult})
 
 ;; (extend types.group.Q3+
-;;   m/AlgebraMeta {:name q3/algebra-name
+;;   ameta/AlgebraMeta {:name q3/algebra-name
 ;;                  :structure q3/structure
 ;;                  :install! q3/install!
 ;;                  :activate! q3/activate!
