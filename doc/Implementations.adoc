@@ -1,5 +1,13 @@
-= implementation notes
+implementations
+===============
 
+There are at least two ways to do this:
+
+* link:#method1[Method 1]: use Clojure Protocols directly: deftype, extend, etc.
+
+* link:#method2[Method 2]: define algebra-specific operators (mimic the Protocol implementation)
+
+= [[method1]] method 1
 
 == namespace and code organization
 
@@ -80,3 +88,4 @@ a type datum.  e.g. instead of (add a b), (add t a b).  the only
 purpose of the type parameter is to determine dispatch-by-type - its
 value is not used.
 
+= [[method2]] method 2
