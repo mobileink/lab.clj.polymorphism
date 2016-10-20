@@ -1,21 +1,18 @@
-(ns algebra.signature.monoid
+(ns algebra.signature.semigroup
   (:refer-clojure :exclude [name])
   (:require [potemkin :refer :all]
             [algebra.signature.magma :as magma]
             [clojure.tools.logging :as log :only [debug info]]))
 
-(clojure.core/println "loading algebra.signature.monoid")
+(clojure.core/println "loading algebra.signature.semigroup")
+
+;; https://en.wikipedia.org/wiki/Semigroup
+;; a semigroup is a set with a binary operation satisfying:
+;;     1.  closure
+;;     2.  associativity
+;; in other words, a semigroup is a magma with associativity
 
 (import '(algebra.signature.magma.Operators))
-
-;(import-vars [algebra.signature [magma]])
-;; (import-fn magma/mag)
-;; (import-fn magma/magfn)
-
-;;(defn foo [] (Operators/magfn 3 3 4))
-
-;; constants
-(def id (atom 0))
 
 ;; operators
 (defprotocol Operators
@@ -23,15 +20,14 @@
   (typ [a] [t a])
 ;  (idem [a] [t a])
   (structure [a] [t a]) ;; returns Keyword
-  (** [a b] [t a b])
-  (constants [t]))
+  (** [a b] [t a b]))
 
 ;; laws
 (declare dispatch-type get-struct-kw try-load-model)
 
 (defn closure
   [a]
-  (log/info "monoid law: associativity" a)
+  (log/info "law: associativity" a)
   (let [dt (dispatch-type)
         log (log/debug "dispatch type: " dt)]
     (if-let [t (= (typ a) (class dt))]
@@ -40,14 +36,14 @@
 
 (defn associativity
   [a b c]
-  (log/info "monoid law: associativity")
+  (log/info "law: associativity")
   (let [s1 (** (** a b) c)
         s2 (** a (** b c))]
     (log/debug "(a * b) * c " s1)
     (log/debug "a * (b * c) " s2)
     (println "(a ** b) ** c = a ** (b ** c) ?  " (= s1 s2))))
 
-(require '(algebra.models.monoid))
+(require '(algebra.models.semigroup))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; meta operations - part of the public sig, but constant across models (i.e. non-semantic ops)
@@ -73,7 +69,7 @@
   effect this is a way of dynamically selecting a model to determine
   the interpretion of an operation.
 
-  Arg is keyword-or-struct (kors)."
+  Arg is keyword-or-struct."
   ([]
    (do
      ;; (log/debug "dispatch-type 0")
@@ -96,7 +92,7 @@
 (declare try-load-model get-struct-kw dispatch-type)
 
 (defn activate!
-  "Set the active model, which determines interpretation of Group ops.  Arg is key-or-struct."
+  "Set the active model, which determines interpretation of ops.  Arg is key-or-struct."
   ([kors]
    (log/debug "activate!: " kors)
     (when (keyword? kors)
@@ -119,21 +115,21 @@
         ))))
 
 (defn install!
-  "Registers a structure (in the form of an object of the struct type) for use in a model."
-  ([sobj]  ;; structure object
+  "Registers a structure for use in a model."
+  ([struct]
    (do
-     (log/debug "install 1: " sobj (type sobj))
-     (let [kw (structure sobj)]
+     (log/debug "install 1: " struct (type struct))
+     (let [kw (structure struct)]
        (log/debug "install 1 kw: " kw)
-       (install! kw sobj))))
-  ([key sobj]
+       (install! kw struct))))
+  ([key struct]
    (do
-     (log/debug "install 2: " key sobj)
+     (log/debug "install 2: " key struct)
      (if (keyword? key)
        (do
          (log/info (str "dispatch-types: " @dispatch-types))
-;         (log/info (str "registering " (name sobj), ", model type: " (class sobj)))
-         (swap! dispatch-types assoc key sobj)
+;         (log/info (str "registering " (name struct), ", model type: " (class struct)))
+         (swap! dispatch-types assoc key struct)
          (log/info (str "dispatch-types: " @dispatch-types))
          )
        (throw (RuntimeException. "arg1 must be clojure keyword"))))))

@@ -1,6 +1,6 @@
 (ns algebra.models.monoid
   (:refer-clojure :exclude [count])
-  (:require [algebra.signature.meta :as ameta]
+  (:require [algebra.signature.proto :as proto]
             [algebra.signature.monoid :as monoid-sig]
             ;; [algebra.signature.group.n0 :as g0]
             ;; [algebra.signature.group.n1 :as g1]
@@ -25,12 +25,12 @@
 
 ;; default model
 (extend java.lang.Object
-  ameta/AlgebraMeta {:name default/algebra-name}
+  proto/ProtoAlgebra {:name default/algebra-name}
                  ;; :install! default/install!
                  ;; :activate! default/activate!
                  ;; :active-model? default/active-model?
                  ;; :active-model default/active-model
-  monoid-sigOperators {:** default/mult
+  monoid-sig/Operators {:** default/mult
                     ;; :idem default/idem
                     :constants default/constants
                     :structure default/structure
@@ -38,29 +38,29 @@
 
 ;; parameterized models
 (extend types.monoid.N0
-  ameta/AlgebraMeta {:name n0/algebra-name}
+  proto/ProtoAlgebra {:name n0/algebra-name}
                  ;; :install! n0/install!
                  ;; :activate! n0/activate!
                  ;; :active-model? n0/active-model?
                  ;; :active-model n0/active-model
-  monoid-sigOperators {:** n0/mult
+  monoid-sig/Operators {:** n0/mult
                     :structure n0/structure
                     :constants n0/constants})
 
 (extend types.monoid.N1
-  ameta/AlgebraMeta {:name n1/algebra-name}
+  proto/ProtoAlgebra {:name n1/algebra-name}
                  ;; :install! n1/install
                  ;; :activate! n1/activate
                  ;; :active-model? n1/active-model?
                  ;; :active-model n1/active-model
-  monoid-sigOperators {:** n1/mult
+  monoid-sig/Operators {:** n1/mult
                     ;; :idem n1/idem
                     :structure n1/structure
                     :constants n1/constants
                     :typ n1/typ})
 
 ;; (extend types.monoid.Q3+
-;;   m/AlgebraMeta {:name q3/algebra-name}
+;;   proto/ProtoAlgebra {:name q3/algebra-name}
 ;;                  ;; :install! q3/install
 ;;                  ;; :activate! q3/activate
 ;;                  ;; :active-model? q3/active-model?

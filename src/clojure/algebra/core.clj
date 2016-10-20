@@ -1,10 +1,10 @@
 (ns algebra.core
   (:require [algebra.signature.monoid :as m]
-            algebra.models.monoid
-            [algebra.structure.monoid.n1 :as n1]
+            ;; algebra.models.monoid
+            ;; [algebra.structure.monoid.n1 :as n1]
             [clojure.tools.logging :as log :only [debug info]]))
 
-(clojure.core/println "loading core")
+(clojure.core/println "loading algebra.core")
 
 (m/install! (java.lang.Object.))
 (m/activate! :default)

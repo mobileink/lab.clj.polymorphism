@@ -2,37 +2,54 @@
 
 Lab for experimenting with polymorphism mechanisms in Clojure.
 
-* <<overview,overview>>
-* <<arities,arities>>
-* <<multimethods,multimethods>>
-* <<protocols,protocols>>
-* <<multimodels,multimodels>>
-* <<misc,misc>>
+More (better) docs on algebras in link:doc[].
 
-== [[overview]] overview: polymorphisms and algebras
+homonymy
 
-== [[arities]] arities
+Mechanisms:
 
-== multimethods
+* delegation: roll-your-own
+* multimethods
+* Clojure Protocols
+* multimodels
 
-== link:http://clojure.org/protocols[protocols]
+What's the difference between Protocols and multimodels?  Multimodels
+support dynamic rebinding.  Protocols are fixed; once you extend a
+type to support a protocol the binding is fixed; to swap an
+implementation, you have to dispatch on a different type.  You can
+mimic true multimodeling with the right technique
+(link:https://github.com/mikera/core.matrix[core.matrix] does this),
+but the technique requires mutable global variables.  Below we
+demonstrate a method that naturally supports multimodeling without
+mutable globals.
 
-This project contains some minimal code intended to demonstrate some
-basic uses of Clojure Protocols.
-
-* <<start,getting started>>
-* <<protocols,protocols>>
-* <<algebra,protocols as algebraic signatures>>
+* <<polymorphisms,polymorphisms>>
+* <<algebras,algebras>>
 ** <<sigs,signatures>>
 ** <<structs,structures>>
 ** <<models,models>>
+* <<start,getting started>>
+* <<multimethods,multimethods>>
+* <<protocols,Clojure Protocols>>
+* <<multimodels,multimodels>>
+* <<misc,misc>>
 * <<impl,implementation>>
 * <<deptypes,emulating dependent types>>
 
-=== [[start]] getting started
+
+
+== [[start]] getting started
+
+This assumes you know how to use Cider in emacs.  If you use some
+other development environment you should be able to figure out what to
+do.  The main example is `src/clojure/multimodels/examples.clj`.
 
 1. Fork/clone
 2. `lein repl`, then do `refresh-all` (see dev/user.clj for config stuff)
+
+Fire up a `cider` session, open multimodels/examples.clj, and load it
+(C-c C-k).  At the bottom of that file are examples of computing with
+algebraic models.
 
 Then explore.  Several algebras are provided; using them as a pattern it
 should be easy to implement your own.
@@ -58,7 +75,11 @@ user => (** 3 5)
 2
 ----
 
-== [[protocols]] protocols
+== [[delegation]] delegation: roll-your-own
+
+== [[multimethods]] multimethods
+
+== [[protocols]] Clojure Protocols
 
 You use `defprotocol` to declare a protocol.  Note that this "defines"
 a protocol object but only "declares" its operators.  Furthermore
@@ -178,7 +199,7 @@ name as the current namespace..." but does not intern a var for the
 type in the current namespace.
 
 
-== [[algebra]] Protocols as Algebraic Operator Signatures ==
+== [[algebras]] algebras
 
 Algebra is where logic meets mathematics.  Loosely speaking, an
 algebra is the marriage of a *signature* (which is a formal logical

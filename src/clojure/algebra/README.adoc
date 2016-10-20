@@ -1,0 +1,50 @@
+
+signature files use defprotocol to declare sig for algebra; they also define axioms as functions
+
+structure files define implementations for the operators declared in the sig protocol; they can have different names
+
+model files use `extend` to map signature ops to structure fns
+
+mechanism
+
+    installed-structs:  map from keywords to structure types
+
+    a.  registers (install!) structures by storing an object to be used for dispatch
+    	note: this applies the standard `structure` op to the sobj; the rule
+	is that every structure must define the `structure` op to return a type keyword
+	that will be used for dispatch; e.g. (structure structure.n0) => :n0
+
+    b.  activates (activate!) a model by alter-var-root *active-model* to set a fn
+    	the current design requires a custom activate! for each sig, in order
+	to set the const syms
+
+	for this to work the default structure (java.lang.Object) must
+	check *active-model* in order to decide whether or not to
+	forward the call.  in other words this forces us to include
+	dispatch logic in the implementations
+
+	core.matrix does this a little differently - it doesn't use a
+	default impl, instead it has a dispatch layer for the sig,
+	which, for each op, fetches the *active-model* and uses it as
+	first arg in re-dispatch.
+
+so a call to an op in a sig is always first dispatched to the default
+model (since java.lang.Object matches everything), which then uses
+*active-model* to re-dispatch.  this allows us to handle the default
+case without a re-dispatch.
+
+in core.matrix, calls are always re-dispatched.
+
+
+Protocol dispatch is general.  The dispatch object can be of any type,
+including an ad-hoc types defined using deftype.  This means that we
+can "reify" protocols.  In a sense this compensates for the weakness
+of having an OO implementation language.  We don't need to dispatch on
+"real" data, we just need a type.
+
+Also allows us to use Protocols as multimethods.  First dispatch goes
+to a default implementation, which examines the args and then
+re-dispatches on a selected dispatch object.  So we can view Protocols
+as a mechanism for grouping multimethods.  Similar to the type classes of e.g. Haskell.
+
+Difference between type classes of FPs and object classes of OO?
